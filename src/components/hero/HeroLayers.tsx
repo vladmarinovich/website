@@ -8,7 +8,7 @@
  * Capas (fondo → frente):
  *  1. HeroBackground  → imagen responsive, zoom scroll-driven
  *  2. NucleusPulse    → glow radial violeta, respira desde 1.8s
- *  3. EnergyFilaments → filamentos de energía en el portal (2.0s)
+ *  3. PortalPulse      → activación estructural: anillos orgánicos + pulsos (2.0s)
  *  4. HeroOverlay     → velos de oscurecimiento + fades de borde
  *
  * Timing de fade (scrollY relativo a viewport height):
@@ -17,7 +17,8 @@
  *  está exactamente en opacity 0 → cross-dissolve sin movimiento.
  */
 
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion'
 
 /* ── Constantes ──────────────────────────────────────────── */
 // Calculado una vez en mount — aceptable para este uso
@@ -37,13 +38,13 @@ const OVERLAY_MOBILE_EXTRA = 0.12
 
 const PULSE_MIN      = 0.10
 const PULSE_MAX      = 0.24
-const PULSE_DURATION = 5.5
+const PULSE_ANIM_DURATION = 5.5  // segundos — para Framer Motion
 const PULSE_DELAY    = 1.8   // espera que el texto se asiente primero
 
 const FILAMENT_DELAY = 2.0   // 0.2s después del glow
 
 /* ── HeroBackground ──────────────────────────────────────── */
-function HeroBackground({ scale }: { scale: ReturnType<typeof useTransform> }) {
+function HeroBackground({ scale }: { scale: MotionValue<number> }) {
   return (
     <motion.div
       className="absolute inset-0"
@@ -77,7 +78,7 @@ function NucleusPulse() {
       initial={{ opacity: 0 }}
       animate={{ opacity: [PULSE_MIN, PULSE_MAX, PULSE_MIN] }}
       transition={{
-        duration: PULSE_DURATION,
+        duration: PULSE_ANIM_DURATION,
         repeat: Infinity,
         ease: 'easeInOut',
         delay: PULSE_DELAY,
@@ -91,49 +92,199 @@ function NucleusPulse() {
   )
 }
 
-/* ── EnergyFilaments ─────────────────────────────────────── */
-// Rayos finos de luz violeta emanando del centro del portal.
-// Conic-gradient con ~13 rayos × alpha 0.25 + mask radial para contención.
-// Opacity del animation es la escala del efecto (baja → alta → baja).
-function EnergyFilaments() {
+/* ── PortalPulse ──────────────────────────────────────────── */
+// Canvas 2D — núcleo de singularidad viva.
+// Sin anillos, sin ondas. Solo la masa amorfa del centro que,
+// al hacer scroll, se expande y TRAGA la pantalla completa.
+// Transición tipo "succión": lenta al inicio, acelera al final.
+// Al llegar a opacity 0 del hero, el núcleo ya cubre toda la pantalla
+// y revela el túnel 3D por debajo — cross-dissolve sin corte.
+
+function PortalPulse() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    let raf: number
+
+    const resize = () => {
+      canvas.width  = window.innerWidth
+      canvas.height = window.innerHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const VH = window.innerHeight
+    const mountTime = performance.now()
+
+    const drawLoop = (now: number) => {
+      raf = requestAnimationFrame(drawLoop)
+
+      const w = canvas.width
+      const h = canvas.height
+      ctx.clearRect(0, 0, w, h)
+
+      const cx = w * 0.5
+      const cy = h * 0.5
+
+      const elapsed = Math.max(0, now - mountTime) / 1000
+      // Ramp de activación: el núcleo aparece 2s después del mount
+      const ramp = Math.min(1, Math.max(0, (elapsed - FILAMENT_DELAY) / 2.0))
+      if (ramp < 0.005) return
+
+      // ── Scroll: la transición de "tragado" ──────────────────
+      const scrollY        = window.scrollY
+      const fadeStart      = VH * 0.55
+      const fadeEnd        = VH * 1.00
+      // transitionFrac: 0 en reposo, 1 cuando el hero desaparece
+      const transitionFrac = Math.min(1, Math.max(0, (scrollY - fadeStart) / (fadeEnd - fadeStart)))
+      // Ease-in³: lento al inicio, se dispara al final (sensación de succión)
+      const tEased         = transitionFrac * transitionFrac * transitionFrac
+
+      // ── Tamaño del núcleo ────────────────────────────────────
+      // Fase 1 (scroll 0 → fadeStart): crece levemente — "respira"
+      const earlyFrac = Math.min(1, Math.max(0, scrollY / fadeStart))
+      const isMobile  = w < 768
+      const portalRef = Math.min(w, h) * 0.40
+      const SR_BASE   = portalRef * (isMobile ? 0.095 : 0.052)
+      const SR_REST   = SR_BASE * (1 + earlyFrac * 0.5)   // crece ~50% antes de la transición
+      // Fase 2 (scroll fadeStart → fadeEnd): el núcleo traga la pantalla completa
+      // SR_MAX = radio que cubre la diagonal total del viewport
+      const SR_MAX    = Math.sqrt(w * w + h * h) * 0.58
+      const SR        = SR_REST + (SR_MAX - SR_REST) * tEased
+
+      // ── Forma orgánica ───────────────────────────────────────
+      // A medida que crece, la forma se suaviza (perturbación ↓)
+      // para que la "succión" se sienta limpia y cinematográfica.
+      const perturbScale = (1 - tEased) * (1 - tEased)  // cuadrático → se amortigua rápido
+      const nucleusShape = (a: number) =>
+        SR * (
+          1.00 +
+          perturbScale * (
+            0.24 * Math.sin(a * 3 + elapsed * 0.30) +
+            0.17 * Math.sin(a * 5 - elapsed * 0.44 + 1.1) +
+            0.11 * Math.cos(a * 7 + elapsed * 0.19 + 2.4) +
+            0.07 * Math.sin(a * 11 - elapsed * 0.33 + 0.6)
+          )
+        )
+
+      const buildNucleusPath = () => {
+        const pts = 96
+        ctx.beginPath()
+        for (let j = 0; j <= pts; j++) {
+          const a = (j / pts) * Math.PI * 2
+          const r = nucleusShape(a)
+          j === 0
+            ? ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r)
+            : ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r)
+        }
+        ctx.closePath()
+      }
+
+      ctx.save()
+      ctx.translate(cx, cy)
+
+      // a. Aura exterior — glow que se atenúa al crecer
+      const auraAlpha = ramp * (1 - tEased * 0.8)
+      buildNucleusPath()
+      ctx.shadowColor = `rgba(155,75,255,${auraAlpha * 0.55})`
+      ctx.shadowBlur  = 28
+      ctx.fillStyle   = 'rgba(0,0,0,0)'
+      ctx.fill()
+
+      const auraGrad = ctx.createRadialGradient(0, 0, SR * 0.6, 0, 0, SR * 2.2)
+      auraGrad.addColorStop(0,   `rgba(150,70,245,${auraAlpha * 0.22})`)
+      auraGrad.addColorStop(0.6, `rgba(110,45,200,${auraAlpha * 0.08})`)
+      auraGrad.addColorStop(1,   'rgba(80,30,170,0)')
+      ctx.shadowBlur = 0
+      ctx.fillStyle  = auraGrad
+      ctx.beginPath()
+      ctx.arc(0, 0, SR * 2.2, 0, Math.PI * 2)
+      ctx.fill()
+
+      // b. Interior del núcleo (clip al contorno orgánico)
+      ctx.save()
+      buildNucleusPath()
+      ctx.clip()
+
+      // Materia oscura densa — casi negro con tinte violeta profundo
+      ctx.fillStyle = `rgba(5,1,16,${ramp * 0.94})`
+      ctx.fillRect(-SR * 2.5, -SR * 2.5, SR * 5, SR * 5)
+
+      // Bolsas de plasma: se atenúan al expandirse (no luchan con el fondo)
+      const plasmaAlpha = 1 - tEased * 0.85
+      for (let i = 0; i < 4; i++) {
+        const pt = elapsed * (0.25 + i * 0.08) + i * 1.6
+        const px = Math.cos(pt)        * SR * 0.38
+        const py = Math.sin(pt * 1.27) * SR * 0.34
+        const pr = SR * (0.36 + 0.12 * Math.sin(elapsed * 0.4 + i))
+        const pg = ctx.createRadialGradient(px, py, 0, px, py, pr)
+        pg.addColorStop(0,   `rgba(210,140,255,${ramp * plasmaAlpha * (0.38 + 0.14 * Math.sin(elapsed * 0.6 + i))})`)
+        pg.addColorStop(0.5, `rgba(155,75,240,${ramp * plasmaAlpha * 0.18})`)
+        pg.addColorStop(1,   'rgba(100,40,180,0)')
+        ctx.fillStyle = pg
+        ctx.fillRect(-SR * 2.5, -SR * 2.5, SR * 5, SR * 5)
+      }
+
+      // Luminosidad central — corazón de la masa
+      const innerCore = ctx.createRadialGradient(0, 0, 0, 0, 0, SR * 0.55)
+      innerCore.addColorStop(0,   `rgba(220,160,255,${ramp * 0.45})`)
+      innerCore.addColorStop(0.5, `rgba(170,90,255,${ramp * 0.22})`)
+      innerCore.addColorStop(1,   'rgba(120,55,220,0)')
+      ctx.fillStyle = innerCore
+      ctx.fillRect(-SR * 2.5, -SR * 2.5, SR * 5, SR * 5)
+
+      ctx.restore() // quita clip
+
+      // c. Contorno vivo — desaparece al crecer
+      const strokeAlpha = ramp * 0.65 * (1 - tEased * 0.95)
+      if (strokeAlpha > 0.01) {
+        buildNucleusPath()
+        ctx.shadowColor = `rgba(175,95,255,${ramp * 0.80 * (1 - tEased)})`
+        ctx.shadowBlur  = 12
+        ctx.strokeStyle = `rgba(190,110,255,${strokeAlpha})`
+        ctx.lineWidth   = 1.2
+        ctx.stroke()
+      }
+
+      ctx.restore()
+
+      // ── Máscara radial ───────────────────────────────────────
+      // En reposo contiene el núcleo dentro del portal.
+      // Durante la transición se disuelve para que el núcleo pueda
+      // crecer sin límite y tragar la pantalla.
+      const maskStrength = 1 - tEased
+      if (maskStrength > 0.01) {
+        const maskR  = portalRef * (1 + tEased * 0.8)
+        const mask   = ctx.createRadialGradient(cx, cy, maskR * 0.70, cx, cy, maskR * 1.08)
+        mask.addColorStop(0,   'rgba(0,0,0,0)')
+        mask.addColorStop(0.6, 'rgba(0,0,0,0)')
+        mask.addColorStop(1,   `rgba(0,0,0,${maskStrength})`)
+        ctx.save()
+        ctx.globalCompositeOperation = 'destination-out'
+        ctx.fillStyle = mask
+        ctx.fillRect(0, 0, w, h)
+        ctx.restore()
+      }
+    }
+
+    raf = requestAnimationFrame(drawLoop)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', resize)
+    }
+  }, [])
+
   return (
-    <motion.div
-      className="absolute inset-0 pointer-events-none"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: [0, 0.80, 0.55, 0.90, 0.60, 0.80] }}
-      transition={{
-        duration: 8,
-        repeat: Infinity,
-        ease: 'easeInOut',
-        delay: FILAMENT_DELAY,
-        times: [0, 0.12, 0.35, 0.58, 0.80, 1],
-      }}
-      style={{
-        // Máscara radial — contiene los rayos dentro del área del portal
-        maskImage:
-          'radial-gradient(ellipse 48% 45% at 50% 50%, black 5%, black 38%, transparent 62%)',
-        WebkitMaskImage:
-          'radial-gradient(ellipse 48% 45% at 50% 50%, black 5%, black 38%, transparent 62%)',
-        // Rayos finos cónicos — nervadura luminosa
-        background: `conic-gradient(
-          from 12deg at 50% 50%,
-          transparent 0deg,   rgba(150,85,255,0.25) 2.5deg,  transparent 5deg,
-          transparent 22deg,  rgba(170,100,255,0.18) 24deg,  transparent 27deg,
-          transparent 46deg,  rgba(135,75,240,0.22) 48.5deg, transparent 51deg,
-          transparent 74deg,  rgba(160,90,255,0.16) 76deg,   transparent 79deg,
-          transparent 102deg, rgba(145,82,255,0.20) 104deg,  transparent 107deg,
-          transparent 128deg, rgba(165,95,255,0.17) 130.5deg,transparent 133deg,
-          transparent 158deg, rgba(138,78,248,0.23) 160deg,  transparent 163deg,
-          transparent 188deg, rgba(152,86,255,0.15) 190deg,  transparent 193deg,
-          transparent 218deg, rgba(158,90,255,0.19) 220deg,  transparent 223deg,
-          transparent 248deg, rgba(142,80,245,0.21) 250.5deg,transparent 253deg,
-          transparent 278deg, rgba(166,95,255,0.14) 280deg,  transparent 283deg,
-          transparent 308deg, rgba(146,83,255,0.20) 310deg,  transparent 313deg,
-          transparent 338deg, rgba(155,88,255,0.17) 340deg,  transparent 343deg,
-          transparent 360deg
-        )`,
-        filter: 'blur(2px)',
-      }}
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ mixBlendMode: 'normal' }}
     />
   )
 }
@@ -184,7 +335,7 @@ export default function HeroLayers() {
     >
       <HeroBackground scale={bgScale} />
       <NucleusPulse />
-      <EnergyFilaments />
+      <PortalPulse />
       <HeroOverlay />
     </motion.div>
   )
