@@ -136,16 +136,29 @@ function PortalPulse() {
       const ramp = Math.min(1, Math.max(0, (elapsed - FILAMENT_DELAY) / 2.0))
       if (ramp < 0.005) return
 
-      // ── Scroll: curva única de expansión ────────────────────
-      // El núcleo empieza a crecer con el primer scroll y cubre
-      // la pantalla completa ANTES de que el túnel sea visible.
-      // expandStart → expandEnd define toda la vida de la expansión.
-      const scrollY      = window.scrollY
-      const EXPAND_START = VH * 0.05   // casi inmediato al primer scroll
-      const EXPAND_END   = VH * 0.55   // pantalla completa justo cuando el hero empieza a fade
-      const expandFrac   = Math.min(1, Math.max(0, (scrollY - EXPAND_START) / (EXPAND_END - EXPAND_START)))
-      // Ease-in²: arranque suave, acelera al final (sensación de succión)
-      const tEased       = expandFrac * expandFrac
+      // ── Scroll: sincronizado con el zoom del fondo ──────────
+      // El zoom usa SCALE_X = [0, 0.25vh, 0.55vh, 0.75vh] con
+      // SCALE_Y = [1, 1.08, 1.55, 2.20]. Derivamos la fracción del
+      // núcleo del mismo rango para que ambos vayan exactamente igual.
+      const scrollY = window.scrollY
+
+      // Piecewise linear sobre los mismos breakpoints del zoom
+      const ZX = [0, VH * 0.25, VH * 0.55, VH * 0.75]
+      const ZY = [0, 0.068,     0.458,      1.0]  // normalizado 0→1 (SCALE_Y−1)/(2.20−1)
+      let tEased = 0
+      if (scrollY <= ZX[0]) {
+        tEased = ZY[0]
+      } else if (scrollY >= ZX[ZX.length - 1]) {
+        tEased = ZY[ZY.length - 1]
+      } else {
+        for (let i = 0; i < ZX.length - 1; i++) {
+          if (scrollY <= ZX[i + 1]) {
+            const t = (scrollY - ZX[i]) / (ZX[i + 1] - ZX[i])
+            tEased = ZY[i] + t * (ZY[i + 1] - ZY[i])
+            break
+          }
+        }
+      }
 
       // ── Tamaño del núcleo ────────────────────────────────────
       const isMobile  = w < 768
