@@ -1,0 +1,45 @@
+/**
+ * Sección Capabilities — capas de intervención.
+ *
+ * Muestra cuatro áreas de trabajo en una grilla 2×2.
+ * Usa separadores de 1px (gap-px sobre bg-white/6) en lugar
+ * de bordes individuales — resulta en líneas más limpias.
+ *
+ * Color de acento: purple (sincronizado con sceneStore.colorMode)
+ */
+
+import { siteCopy } from '@/content/siteCopy'
+
+export default function Capabilities() {
+  const c = siteCopy.capabilities
+
+  return (
+    <section id="capabilities" className="relative py-32 px-6 md:px-12">
+      <div className="max-w-7xl mx-auto">
+
+        <p className="font-mono text-xs tracking-[0.25em] text-accent-purple mb-6 uppercase">
+          {c.eyebrow}
+        </p>
+
+        <h2 className="text-4xl md:text-6xl font-bold text-textPrimary leading-none tracking-tight mb-6">
+          {c.title}
+        </h2>
+
+        <p className="text-textSecondary text-lg max-w-2xl leading-relaxed mb-16">
+          {c.body}
+        </p>
+
+        {/* Grilla 2×2 — separadores de 1px creados con gap-px sobre fondo blanco tenue */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/[0.06]">
+          {c.items.map((item, i) => (
+            <div key={i} className="bg-background p-8">
+              <h3 className="text-textPrimary font-semibold text-lg mb-3">{item.title}</h3>
+              <p className="text-textSecondary text-sm leading-relaxed">{item.body}</p>
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </section>
+  )
+}
