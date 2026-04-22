@@ -44,12 +44,13 @@ export default function Nav() {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between h-16">
 
-        {/* Marca — vuelve al top al hacer click */}
-        <a
-          href="#"
-          className="font-mono text-xs tracking-[0.2em] text-textSecondary hover:text-textPrimary transition-colors uppercase"
-        >
-          {siteCopy.nav.brand}
+        {/* Logo — vuelve al top al hacer click */}
+        <a href="#" className="flex items-center hover:opacity-80 transition-opacity">
+          <img
+            src="/assets/images/logo.svg"
+            alt={siteCopy.nav.brand}
+            className="h-6 w-auto"
+          />
         </a>
 
         {/* Links de navegación — solo visibles en desktop */}
