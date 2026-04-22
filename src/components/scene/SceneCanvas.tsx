@@ -300,7 +300,7 @@ export default function SceneCanvas() {
     <div
       className="fixed inset-0 z-0"
       aria-hidden="true"
-      style={{ background: '#05070B' }}  // color base visible antes de que cargue el Canvas
+      style={{ background: '#05070B' }}
     >
       <Canvas
         camera={{ position: [0, 0, 0.1], fov: 72, near: 0.01, far: 50 }}
