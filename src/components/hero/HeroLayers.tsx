@@ -136,31 +136,28 @@ function PortalPulse() {
       const ramp = Math.min(1, Math.max(0, (elapsed - FILAMENT_DELAY) / 2.0))
       if (ramp < 0.005) return
 
-      // ── Scroll: la transición de "tragado" ──────────────────
-      const scrollY        = window.scrollY
-      const fadeStart      = VH * 0.55
-      const fadeEnd        = VH * 1.00
-      // transitionFrac: 0 en reposo, 1 cuando el hero desaparece
-      const transitionFrac = Math.min(1, Math.max(0, (scrollY - fadeStart) / (fadeEnd - fadeStart)))
-      // Ease-in³: lento al inicio, se dispara al final (sensación de succión)
-      const tEased         = transitionFrac * transitionFrac * transitionFrac
+      // ── Scroll: curva única de expansión ────────────────────
+      // El núcleo empieza a crecer con el primer scroll y cubre
+      // la pantalla completa ANTES de que el túnel sea visible.
+      // expandStart → expandEnd define toda la vida de la expansión.
+      const scrollY      = window.scrollY
+      const EXPAND_START = VH * 0.05   // casi inmediato al primer scroll
+      const EXPAND_END   = VH * 0.55   // pantalla completa justo cuando el hero empieza a fade
+      const expandFrac   = Math.min(1, Math.max(0, (scrollY - EXPAND_START) / (EXPAND_END - EXPAND_START)))
+      // Ease-in²: arranque suave, acelera al final (sensación de succión)
+      const tEased       = expandFrac * expandFrac
 
       // ── Tamaño del núcleo ────────────────────────────────────
-      // Fase 1 (scroll 0 → fadeStart): crece levemente — "respira"
-      const earlyFrac = Math.min(1, Math.max(0, scrollY / fadeStart))
       const isMobile  = w < 768
       const portalRef = Math.min(w, h) * 0.40
       const SR_BASE   = portalRef * (isMobile ? 0.095 : 0.052)
-      const SR_REST   = SR_BASE * (1 + earlyFrac * 0.5)   // crece ~50% antes de la transición
-      // Fase 2 (scroll fadeStart → fadeEnd): el núcleo traga la pantalla completa
-      // SR_MAX = radio que cubre la diagonal total del viewport
+      // SR_MAX cubre la diagonal completa del viewport — sin esquinas visibles
       const SR_MAX    = Math.sqrt(w * w + h * h) * 0.58
-      const SR        = SR_REST + (SR_MAX - SR_REST) * tEased
+      const SR        = SR_BASE + (SR_MAX - SR_BASE) * tEased
 
       // ── Forma orgánica ───────────────────────────────────────
-      // A medida que crece, la forma se suaviza (perturbación ↓)
-      // para que la "succión" se sienta limpia y cinematográfica.
-      const perturbScale = (1 - tEased) * (1 - tEased)  // cuadrático → se amortigua rápido
+      // La perturbación baja al crecer: la succión se siente limpia
+      const perturbScale = (1 - tEased) * (1 - tEased)
       const nucleusShape = (a: number) =>
         SR * (
           1.00 +
