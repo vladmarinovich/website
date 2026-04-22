@@ -7,15 +7,19 @@
  * Componentes de la escena:
  *  - CameraRig      → posiciona la cámara a lo largo del PATH
  *  - Tunnel         → tubo interior TubeGeometry (BackSide) como paredes
- *  - Rings          → anillos torus en intervalos que reaccionan al colorMode
- *  - DustParticles  → 600 puntos flotantes para dar profundidad
- *  - Environment    → luz ambiental mínima + niebla de profundidad
- *  - Effects        → EffectComposer con Bloom + Vignette (postprocesado)
+ *  - Rings          → anillos torus que reaccionan a colorMode + tunnelIntensity
+ *  - DustParticles  → 600 puntos flotantes que se atenúan con el scroll
+ *  - Environment    → luz ambiental que escala con tunnelIntensity + niebla
+ *  - Effects        → EffectComposer con Bloom dinámico + Vignette
  *
  * Lectura del store:
  *  - Dentro de useFrame se usa useSceneStore.getState() (patrón Zustand
  *    fuera de React) para leer el estado sin disparar re-renders.
- *  - Los colores se interpolan con lerp() por frame para transiciones suaves.
+ *  - Los colores y valores escalares se interpolan con lerp() por frame.
+ *
+ * Fase 3 — orquestación dinámica:
+ *  - tunnelIntensity → opacidad de anillos + intensidad de luz ambiental
+ *  - bloomStrength   → intensidad del efecto bloom en postprocesado
  */
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
@@ -23,6 +27,7 @@ import { Suspense, useRef, useMemo } from 'react'
 import * as THREE from 'three'
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
+import type { BloomEffect } from 'postprocessing'
 import { useSceneStore } from '@/store/sceneStore'
 
 /* ── Paleta de colores por modo ──────────────────────────── */
@@ -52,7 +57,7 @@ const PATH = new THREE.CatmullRomCurve3([
 // Número de anillos distribuidos a lo largo del corredor
 const RING_COUNT = 22
 
-// Interpolación lineal — usada para suavizar posición y colores por frame
+// Interpolación lineal — usada para suavizar posición, colores y opacidades por frame
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 /* ── CameraRig ───────────────────────────────────────────── */
@@ -112,11 +117,15 @@ function Tunnel() {
 // 22 anillos TorusGeometry orientados perpendicularmente a la curva.
 // La orientación se calcula con setFromUnitVectors(Z_local → tangente).
 // Los colores hacen lerp hacia MODE_PALETTE[colorMode] en cada frame.
+// La opacidad escala con tunnelIntensity — los anillos se atenúan al bajar.
 // Cada 3er anillo tiene un segundo anillo interior más fino.
 function Rings() {
-  // Array de refs para actualizar el color de cada anillo en useFrame
-  const ringRefs = useRef<(THREE.Mesh | null)[]>(Array(RING_COUNT).fill(null))
-  const ringCol  = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
+  // Refs para actualizar color y opacidad de cada anillo en useFrame
+  const ringRefs      = useRef<(THREE.Mesh | null)[]>(Array(RING_COUNT).fill(null))
+  const innerRingRefs = useRef<(THREE.Mesh | null)[]>([])
+  const ringCol       = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
+  const ringOpacity   = useRef(0.28)   // opacidad suavizada de los anillos principales
+  const innerOpacity  = useRef(0.15)   // opacidad suavizada de los anillos interiores
 
   // Posiciones y quaterniones precalculados — no recalcular en cada render
   const ringData = useMemo(() => {
@@ -137,22 +146,45 @@ function Rings() {
   }, [])
 
   useFrame(() => {
-    // Leer el modo actual sin re-render de React
-    const target = MODE_PALETTE[useSceneStore.getState().colorMode] ?? MODE_PALETTE.cyan
+    const { colorMode, tunnelIntensity } = useSceneStore.getState()
+    const target = MODE_PALETTE[colorMode] ?? MODE_PALETTE.cyan
 
-    // Interpolación de color por frame — factor 0.045 = transición suave ~22 frames
+    // Interpolación de color — factor 0.045 ≈ 22 frames de transición
     ringCol.current.lerp(new THREE.Color(target.ring), 0.045)
 
-    // Aplicar el color interpolado a todos los anillos activos
+    // Interpolación de opacidad — proporcional a tunnelIntensity
+    // Mínimo 0.04 para que los anillos nunca desaparezcan completamente
+    const targetMainOpacity  = Math.max(0.04, 0.28 * tunnelIntensity)
+    const targetInnerOpacity = Math.max(0.02, 0.15 * tunnelIntensity)
+    ringOpacity.current  = lerp(ringOpacity.current,  targetMainOpacity,  0.03)
+    innerOpacity.current = lerp(innerOpacity.current, targetInnerOpacity, 0.03)
+
+    // Actualizar todos los anillos principales
     ringRefs.current.forEach((mesh) => {
       if (!mesh) return
-      ;(mesh.material as THREE.MeshBasicMaterial).color.copy(ringCol.current)
+      const mat = mesh.material as THREE.MeshBasicMaterial
+      mat.color.copy(ringCol.current)
+      mat.opacity = ringOpacity.current
+    })
+
+    // Actualizar los anillos interiores secundarios
+    innerRingRefs.current.forEach((mesh) => {
+      if (!mesh) return
+      const mat = mesh.material as THREE.MeshBasicMaterial
+      mat.color.copy(ringCol.current)
+      mat.opacity = innerOpacity.current
     })
   })
 
+  // Precalcular subset de anillos interiores (cada 3er índice)
+  const innerRingData = useMemo(
+    () => ringData.filter((_, i) => i % 3 === 0),
+    [ringData]
+  )
+
   return (
     <>
-      {/* Anillos principales — opacidad 0.28 para sutileza */}
+      {/* Anillos principales */}
       {ringData.map(({ pos, quat, scale }, i) => (
         <mesh
           key={i}
@@ -172,8 +204,13 @@ function Rings() {
       ))}
 
       {/* Anillos interiores secundarios — cada 3er anillo, más finos y tenues */}
-      {ringData.filter((_, i) => i % 3 === 0).map(({ pos, quat }, i) => (
-        <mesh key={`interior-${i}`} position={pos} quaternion={quat}>
+      {innerRingData.map(({ pos, quat }, i) => (
+        <mesh
+          key={`interior-${i}`}
+          ref={(el) => { innerRingRefs.current[i] = el }}
+          position={pos}
+          quaternion={quat}
+        >
           <torusGeometry args={[1.55, 0.004, 6, 80]} />
           <meshBasicMaterial
             color={MODE_PALETTE.cyan.ring}
@@ -189,11 +226,12 @@ function Rings() {
 /* ── DustParticles ───────────────────────────────────────── */
 // 600 puntos distribuidos aleatoriamente a lo largo del corredor.
 // Derivan lentamente en Y con seno para simular polvo en suspensión.
-// El color sigue al colorMode con lerp igual que los anillos.
+// El color y la opacidad siguen al colorMode y tunnelIntensity.
 function DustParticles() {
-  const ref   = useRef<THREE.Points>(null)
-  const count = 600
-  const col   = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
+  const ref           = useRef<THREE.Points>(null)
+  const count         = 600
+  const col           = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
+  const dustOpacity   = useRef(0.45)  // opacidad suavizada de las partículas
 
   // Posiciones iniciales aleatorias — no recalcular después
   const positions = useMemo(() => {
@@ -209,10 +247,19 @@ function DustParticles() {
   useFrame((state) => {
     if (!ref.current) return
 
-    // Actualizar color de las partículas con lerp
-    const target = MODE_PALETTE[useSceneStore.getState().colorMode] ?? MODE_PALETTE.cyan
+    const { colorMode, tunnelIntensity } = useSceneStore.getState()
+    const target = MODE_PALETTE[colorMode] ?? MODE_PALETTE.cyan
+
+    // Actualizar color con lerp
     col.current.lerp(new THREE.Color(target.ring), 0.04)
-    ;(ref.current.material as THREE.PointsMaterial).color.copy(col.current)
+
+    // Atenuar partículas con tunnelIntensity — mínimo 0.05 para mantener presencia
+    const targetDustOpacity = Math.max(0.05, 0.45 * tunnelIntensity)
+    dustOpacity.current = lerp(dustOpacity.current, targetDustOpacity, 0.03)
+
+    const mat = ref.current.material as THREE.PointsMaterial
+    mat.color.copy(col.current)
+    mat.opacity = dustOpacity.current
 
     // Deriva suave en Y — diferente fase por partícula (índice i)
     const arr = ref.current.geometry.attributes.position.array as Float32Array
@@ -241,12 +288,24 @@ function DustParticles() {
 }
 
 /* ── Environment ─────────────────────────────────────────── */
-// Luz ambiental mínima (0.06) para que el material del túnel
-// no sea completamente plano. La niebla crea el fade a negro.
+// Luz ambiental que escala con tunnelIntensity para que la escena
+// se oscurezca gradualmente a medida que el usuario baja el scroll.
+// La niebla crea el fade a negro en la profundidad del corredor.
 function Environment() {
+  const lightRef = useRef<THREE.AmbientLight>(null)
+
+  useFrame(() => {
+    if (!lightRef.current) return
+    const { tunnelIntensity } = useSceneStore.getState()
+    // Mapear intensidad 0–1 a rango de luz 0.01–0.08
+    // Nunca completamente negro para mantener legibilidad mínima
+    const targetIntensity = 0.01 + tunnelIntensity * 0.07
+    lightRef.current.intensity = lerp(lightRef.current.intensity, targetIntensity, 0.03)
+  })
+
   return (
     <>
-      <ambientLight intensity={0.06} />
+      <ambientLight ref={lightRef} intensity={0.08} />
       {/* Niebla exponencial: starts 4u, completamente negro a 28u */}
       <fog attach="fog" args={['#05070B', 4, 28]} />
     </>
@@ -254,14 +313,28 @@ function Environment() {
 }
 
 /* ── Effects ─────────────────────────────────────────────── */
-// Postprocesado con bloom contenido y viñeta profunda.
+// Postprocesado con bloom dinámico y viñeta profunda.
+// La intensidad del bloom hace lerp hacia bloomStrength en cada frame —
+// sin re-renders de React, todo dentro de useFrame.
 // luminanceThreshold: 0.18 — solo los anillos brillantes activan el bloom.
-// El background oscuro (#05070B) queda por debajo del umbral.
 function Effects() {
+  const bloomRef        = useRef<BloomEffect>(null)
+  const currentIntensity = useRef(0.55)  // intensidad actual del bloom (interpolada)
+
+  useFrame(() => {
+    const { bloomStrength } = useSceneStore.getState()
+    // Lerp hacia el target — factor 0.04 ≈ 25 frames de transición suave
+    currentIntensity.current = lerp(currentIntensity.current, bloomStrength, 0.04)
+    if (bloomRef.current) {
+      bloomRef.current.intensity = currentIntensity.current
+    }
+  })
+
   return (
     <EffectComposer>
       <Bloom
-        intensity={0.55}             // bloom suave — no sci-fi, premium
+        ref={bloomRef}
+        intensity={0.55}             // valor inicial — sobreescrito en useFrame
         luminanceThreshold={0.18}    // activa en elementos brillantes
         luminanceSmoothing={0.45}    // transición gradual del bloom
         mipmapBlur                   // bloom de alta calidad con mip maps
