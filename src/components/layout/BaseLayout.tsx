@@ -14,7 +14,7 @@ interface BaseLayoutProps {
 
 export default function BaseLayout({ children }: BaseLayoutProps) {
   return (
-    <div className="relative min-h-screen bg-background text-textPrimary">
+    <div className="relative min-h-screen text-textPrimary">
       <Nav />
       {/* z-10 garantiza que el contenido se muestre sobre el Canvas 3D */}
       <main className="relative z-10">
