@@ -39,11 +39,13 @@ export default function About() {
             </blockquote>
           </div>
 
-          {/* Retrato — placeholder hasta Fase 5 */}
-          <div className="aspect-[3/4] bg-surface rounded-sm border border-white/[0.06] flex items-center justify-center">
-            <span className="font-mono text-xs text-textSecondary/30 tracking-widest">
-              PORTRAIT — FASE 5
-            </span>
+          {/* Retrato */}
+          <div className="aspect-[3/4] bg-surface rounded-sm border border-white/[0.06] overflow-hidden">
+            <img
+              src="/assets/images/profile.jpg"
+              alt="Vlad Marinovich"
+              className="w-full h-full object-cover object-top"
+            />
           </div>
 
         </div>
