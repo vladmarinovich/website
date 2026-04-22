@@ -8,9 +8,13 @@
  * CTAs:
  *  - Primario → scroll a #contact
  *  - Secundario → scroll a #evidence
+ *
+ * Animaciones de entrada: eyebrow → título → subtítulo → CTAs
+ * con stagger de 0.10s entre elementos.
  */
 
 import { siteCopy } from '@/content/siteCopy'
+import { FadeUp } from '@/components/ui/FadeUp'
 
 export default function Hero() {
   const c = siteCopy.hero
@@ -43,35 +47,43 @@ export default function Hero() {
       <div className="relative z-10 max-w-7xl mx-auto w-full">
 
         {/* Eyebrow — disponibilidad actual */}
-        <p className="font-mono text-xs tracking-[0.25em] text-accent-cyan mb-6 uppercase">
-          {c.eyebrow}
-        </p>
+        <FadeUp delay={0.05}>
+          <p className="font-mono text-xs tracking-[0.25em] text-accent-cyan mb-6 uppercase">
+            {c.eyebrow}
+          </p>
+        </FadeUp>
 
         {/* Titular principal */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-textPrimary leading-none tracking-tight max-w-4xl mb-6">
-          {c.title}
-        </h1>
+        <FadeUp delay={0.15}>
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-textPrimary leading-none tracking-tight max-w-4xl mb-6">
+            {c.title}
+          </h1>
+        </FadeUp>
 
         {/* Subtítulo */}
-        <p className="text-textSecondary text-lg md:text-xl max-w-2xl leading-relaxed mb-10">
-          {c.subtitle}
-        </p>
+        <FadeUp delay={0.25}>
+          <p className="text-textSecondary text-lg md:text-xl max-w-2xl leading-relaxed mb-10">
+            {c.subtitle}
+          </p>
+        </FadeUp>
 
         {/* CTAs */}
-        <div className="flex gap-4">
-          <a
-            href="#contact"
-            className="px-6 py-3 bg-accent-cyan text-background font-mono text-xs tracking-[0.15em] uppercase rounded-sm hover:opacity-90 transition-opacity"
-          >
-            {c.ctaPrimary}
-          </a>
-          <a
-            href="#evidence"
-            className="px-6 py-3 border border-white/10 text-textSecondary font-mono text-xs tracking-[0.15em] uppercase rounded-sm hover:border-white/25 hover:text-textPrimary transition-all"
-          >
-            {c.ctaSecondary}
-          </a>
-        </div>
+        <FadeUp delay={0.35}>
+          <div className="flex gap-4">
+            <a
+              href="#contact"
+              className="px-6 py-3 bg-accent-cyan text-background font-mono text-xs tracking-[0.15em] uppercase rounded-sm hover:opacity-90 transition-opacity"
+            >
+              {c.ctaPrimary}
+            </a>
+            <a
+              href="#evidence"
+              className="px-6 py-3 border border-white/10 text-textSecondary font-mono text-xs tracking-[0.15em] uppercase rounded-sm hover:border-white/25 hover:text-textPrimary transition-all"
+            >
+              {c.ctaSecondary}
+            </a>
+          </div>
+        </FadeUp>
 
       </div>
     </section>
