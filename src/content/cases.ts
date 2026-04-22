@@ -39,7 +39,8 @@ export const cases: CaseStudy[] = [
       { label: 'Automatizaciones activas',      value: '12+'    },
     ],
     assets: [
-      { src: '/src/assets/images/cases/salvando-patitas/.gitkeep', alt: 'Salvando Patitas platform', kind: 'full' },
+      { src: '/assets/cases/salvando-patitas/casos-generales.png', alt: 'Salvando Patitas — casos generales', kind: 'full' },
+      { src: '/assets/cases/salvando-patitas/finanzas.png',        alt: 'Salvando Patitas — módulo de finanzas', kind: 'detail' },
     ],
   },
 
@@ -69,7 +70,10 @@ export const cases: CaseStudy[] = [
       { label: 'Plataforma',         value: 'GCP BigQuery'  },
     ],
     assets: [
-      { src: '/src/assets/images/cases/casa-ronald/.gitkeep', alt: 'Casa Ronald BigQuery DW', kind: 'full' },
+      { src: '/assets/cases/casa-ronald/mockup-1.png', alt: 'Casa Ronald — respuesta automática 1', kind: 'full'   },
+      { src: '/assets/cases/casa-ronald/mockup-2.png', alt: 'Casa Ronald — respuesta automática 2', kind: 'crop'   },
+      { src: '/assets/cases/casa-ronald/mockup-3.png', alt: 'Casa Ronald — respuesta automática 3', kind: 'detail' },
+      { src: '/assets/cases/casa-ronald/mockup-4.png', alt: 'Casa Ronald — respuesta automática 4', kind: 'detail' },
     ],
   },
 
@@ -99,7 +103,7 @@ export const cases: CaseStudy[] = [
       { label: 'Estado',            value: 'Producto en desarrollo'},
     ],
     assets: [
-      { src: '/src/assets/images/cases/orionbi/.gitkeep', alt: 'Orion BI platform', kind: 'full' },
+      { src: '/assets/cases/orionbi/mockup.webp', alt: 'Orion BI — plataforma', kind: 'full' },
     ],
   },
 ]
