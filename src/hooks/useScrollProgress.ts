@@ -5,33 +5,32 @@
  * La escena 3D lee este valor en useFrame() sin pasar por React,
  * lo que evita re-renders en cada evento de scroll.
  *
- * Offset del hero (Fase 3+):
- *  El hero vive en un contenedor de 250vh (150vh de scroll range pineado).
- *  Durante esos primeros 150vh la cámara NO debe moverse — el usuario está
- *  dentro del portal de entrada. El progreso empieza a contar solo después
- *  de que el hero se desvanece completamente.
+ * Offset del hero:
+ *  El hero ocupa 100vh de altura en el documento. Durante ese primer
+ *  100vh la cámara no debe moverse — el usuario está viendo el portal
+ *  de entrada. La cámara empieza a avanzar solo después de que el hero
+ *  se disuelve y Evidence entra al viewport.
  *
- *  HERO_SCROLL_OFFSET = 150vh (en px calculados en tiempo real)
- *  El rango de la cámara es: [HERO_OFFSET, maxScroll] → [0, 1]
+ *  getHeroOffset() devuelve 1 × viewport height en píxeles.
+ *  El rango efectivo de la cámara: [heroOffset, maxScroll] → [0, 1]
  */
 
 import { useEffect } from 'react'
 import { useSceneStore } from '@/store/sceneStore'
 
-// El hero es 250vh alto, la parte sticky es 100vh → offset de scroll = 150vh
-// Se calcula dinámicamente para soportar distintas alturas de pantalla.
-const getHeroOffset = () => window.innerHeight * 1.5
+// El hero ocupa exactamente 100vh → offset = 1 × innerHeight
+const getHeroOffset = () => window.innerHeight
 
 export function useScrollProgress() {
   const setProgress = useSceneStore((s) => s.setProgress)
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop    = window.scrollY
-      const maxScroll    = document.body.scrollHeight - window.innerHeight
-      const heroOffset   = getHeroOffset()
+      const scrollTop  = window.scrollY
+      const maxScroll  = document.body.scrollHeight - window.innerHeight
+      const heroOffset = getHeroOffset()
 
-      // Rango efectivo de la cámara: empieza después del hero
+      // La cámara empieza a moverse después del hero
       const effectiveTop = Math.max(0, scrollTop - heroOffset)
       const effectiveMax = Math.max(1, maxScroll - heroOffset)
       const progress     = effectiveTop / effectiveMax
@@ -40,7 +39,6 @@ export function useScrollProgress() {
     }
 
     handleScroll()
-
     window.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleScroll)
 

@@ -1,21 +1,25 @@
 /**
  * Raíz de la aplicación.
  *
- * AppInner monta los hooks globales en orden:
+ * Capas fijas en orden de z-index:
+ *  z-0  → SceneCanvas     (tunnel 3D, siempre presente)
+ *  z-1  → HeroLayers      (fondo del hero, se disuelve al scrollear)
+ *  z-5  → ContactBurstOverlay (halo blanco al llegar a contact)
+ *  z-10 → BaseLayout      (todo el contenido HTML)
+ *
+ * HeroLayers está FUERA de BaseLayout para que su position:fixed
+ * opere en el contexto raíz y nunca "suba" con el scroll.
+ *
+ * Hooks globales (AppInner):
  *  1. useLenis               → scroll suavizado
  *  2. useScrollProgress      → progreso 0–1 al sceneStore
  *  3. useDeviceTier          → tier del dispositivo al uiStore
  *  4. useScrollOrchestration → sección activa + estado completo de escena
- *
- * La escena 3D (SceneCanvas) se renderiza en z-index 0 como
- * fondo fijo. El contenido HTML vive encima en z-index 10.
- *
- * ContactBurstOverlay añade un halo blanco sobre la escena al llegar
- * a la sección contact, sin pasar por el pipeline 3D.
  */
 
 import BaseLayout from '@/components/layout/BaseLayout'
 import SceneCanvas from '@/components/scene/SceneCanvas'
+import HeroLayers from '@/components/hero/HeroLayers'
 import Hero from '@/components/sections/Hero'
 import Evidence from '@/components/sections/Evidence'
 import Capabilities from '@/components/sections/Capabilities'
@@ -29,15 +33,9 @@ import { useDeviceTier } from '@/hooks/useDeviceTier'
 import { useScrollOrchestration } from '@/hooks/useScrollOrchestration'
 import { useSceneStore } from '@/store/sceneStore'
 
-/**
- * Overlay HTML que aparece gradualmente al entrar en la sección contact.
- *
- * Es un halo radial blanco-azulado centrado en la parte baja de pantalla.
- * La opacidad viene de contactBurstProgress (0→1) para que la transición
- * sea suave y proporcional al scroll, sin depender del pipeline 3D.
- *
- * z-index 5 — por encima del Canvas (z-0) pero debajo del contenido (z-10).
- */
+/* ── ContactBurstOverlay ─────────────────────────────────── */
+// Halo radial blanco-azulado al llegar a la sección contact.
+// z-5: encima del hero (z-1) y del tunnel (z-0), debajo del contenido (z-10).
 function ContactBurstOverlay() {
   const burst = useSceneStore((s) => s.contactBurstProgress)
   if (burst < 0.01) return null
@@ -47,7 +45,6 @@ function ContactBurstOverlay() {
       className="fixed inset-0 pointer-events-none"
       style={{
         zIndex: 5,
-        // Halo radial centrado-inferior — simula una fuente de luz blanca lejana
         background: `radial-gradient(ellipse 80% 50% at 50% 85%,
           rgba(190, 210, 230, ${burst * 0.13}) 0%,
           transparent 70%)`,
@@ -56,21 +53,25 @@ function ContactBurstOverlay() {
   )
 }
 
+/* ── AppInner ────────────────────────────────────────────── */
 function AppInner() {
   useLenis()
   useScrollProgress()
   useDeviceTier()
-  useScrollOrchestration()  // reemplaza useSectionMode — orquesta el estado completo
+  useScrollOrchestration()
 
   return (
     <>
-      {/* Escena 3D — fondo fijo, z-index 0 */}
+      {/* z-0 — tunnel 3D de fondo */}
       <SceneCanvas />
 
-      {/* Halo blanco de contact — z-index 5, entre Canvas y contenido */}
+      {/* z-1 — fondo del hero, fixed, se disuelve con scroll */}
+      <HeroLayers />
+
+      {/* z-5 — halo blanco en contact */}
       <ContactBurstOverlay />
 
-      {/* Contenido HTML — encima de la escena, z-index 10 via BaseLayout */}
+      {/* z-10 — todo el contenido HTML */}
       <BaseLayout>
         <Hero />
         <Evidence />
