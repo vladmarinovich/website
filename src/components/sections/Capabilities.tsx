@@ -7,8 +7,7 @@
  *
  * Color de acento: purple (sincronizado con sceneStore.colorMode)
  *
- * Animaciones: header con FadeUp, cada celda de la grilla
- * aparece con un stagger de 0.08s entre elementos.
+ * Legibilidad: body text a text-xl, items de grilla a text-base.
  */
 
 import { siteCopy } from '@/content/siteCopy'
@@ -21,7 +20,6 @@ export default function Capabilities() {
     <section id="capabilities" className="relative py-32 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
 
-        {/* Encabezado de sección */}
         <FadeUp>
           <p className="font-mono text-xs tracking-[0.25em] text-accent-purple mb-6 uppercase">
             {c.eyebrow}
@@ -31,19 +29,18 @@ export default function Capabilities() {
             {c.title}
           </h2>
 
-          <p className="text-textSecondary text-lg max-w-2xl leading-relaxed mb-16">
+          <p className="text-textSecondary text-xl max-w-2xl leading-relaxed mb-16">
             {c.body}
           </p>
         </FadeUp>
 
-        {/* Grilla 2×2 — separadores de 1px creados con gap-px sobre fondo blanco tenue */}
-        {/* Cada celda aparece con un stagger para dar ritmo a la lectura */}
+        {/* Grilla 2×2 — separadores de 1px */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/[0.06]">
           {c.items.map((item, i) => (
             <FadeUp key={i} delay={i * 0.08} className="bg-background">
               <div className="p-8">
                 <h3 className="text-textPrimary font-semibold text-lg mb-3">{item.title}</h3>
-                <p className="text-textSecondary text-sm leading-relaxed">{item.body}</p>
+                <p className="text-textSecondary text-base leading-relaxed">{item.body}</p>
               </div>
             </FadeUp>
           ))}

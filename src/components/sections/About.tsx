@@ -3,13 +3,9 @@
  *
  * Layout de dos columnas:
  *  - Izquierda: texto, cita con borde lateral naranja
- *  - Derecha: retrato (foto real cargada desde public/assets/images/)
+ *  - Derecha: retrato (foto real desde public/assets/images/)
  *
- * El blockquote usa border-accent-orange para reflejar
- * el color de acento asignado a esta sección.
- *
- * Animaciones: columna de texto entra desde la izquierda (FadeUp),
- * el retrato aparece con un delay de 0.15s para dar ritmo visual.
+ * Legibilidad: body text a text-xl, blockquote a text-xl.
  */
 
 import { siteCopy } from '@/content/siteCopy'
@@ -28,7 +24,6 @@ export default function About() {
           </p>
         </FadeUp>
 
-        {/* Grilla 2 columnas: texto + retrato */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
 
           {/* Columna de texto */}
@@ -36,16 +31,15 @@ export default function About() {
             <h2 className="text-4xl md:text-5xl font-bold text-textPrimary leading-tight tracking-tight mb-8">
               {c.title}
             </h2>
-            <p className="text-textSecondary text-lg leading-relaxed mb-6">{c.bodyPrimary}</p>
-            <p className="text-textSecondary text-lg leading-relaxed mb-10">{c.bodySecondary}</p>
+            <p className="text-textSecondary text-xl leading-relaxed mb-6">{c.bodyPrimary}</p>
+            <p className="text-textSecondary text-xl leading-relaxed mb-10">{c.bodySecondary}</p>
 
-            {/* Cita destacada — borde lateral de acento naranja */}
-            <blockquote className="border-l-2 border-accent-orange pl-6 text-textPrimary italic text-lg">
+            <blockquote className="border-l-2 border-accent-orange pl-6 text-textPrimary italic text-xl leading-relaxed">
               "{c.quote}"
             </blockquote>
           </FadeUp>
 
-          {/* Retrato — aparece con delay para dar sensación de despliegue */}
+          {/* Retrato */}
           <FadeUp delay={0.22}>
             <div className="aspect-[3/4] bg-surface rounded-sm border border-white/[0.06] overflow-hidden">
               <img

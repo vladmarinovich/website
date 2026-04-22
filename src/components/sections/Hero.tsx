@@ -1,26 +1,26 @@
 /**
- * Sección Hero — portal de entrada al sistema.
+ * Sección Hero — secuencia de activación + portal de entrada.
  *
- * Mecánica de scroll:
- *  El hero vive en un contenedor de 250vh con la sección interna
- *  en position:sticky. Mientras el usuario scrollea, la imagen
- *  hace zoom no-lineal hacia el núcleo violeta. A ~0.72 de progreso,
- *  el hero se desvanece y el tunnel 3D (Canvas en z-0) queda expuesto.
- *  La sensación es entrar al sistema, no hacer zoom a una imagen.
+ * Narrative timing (on mount):
+ *  0.05s → eyebrow aparece
+ *  0.15s → headline aparece
+ *  0.25s → subtitle aparece
+ *  0.35s → CTAs aparecen
+ *  1.80s → NucleusPulse se activa (portal empieza a respirar)
+ *  2.50s → EnergyFilaments aparecen (filamentos internos del portal)
  *
- * Capas en orden (fondo → contenido):
- *  1. HeroBackground  → imagen responsive con zoom scroll-driven
- *  2. NucleusPulse    → halo radial violeta que respira
- *  3. HeroOverlay     → velos de oscurecimiento y fades de borde
- *  4. HeroContent     → copy — desaparece antes que el fondo
+ * Narrative timing (on scroll):
+ *  0% – 8%   → imagen quieta, texto en lectura
+ *  8% – 26%  → copy desaparece suavemente
+ *  0% – 75%  → zoom no-lineal hacia el núcleo
+ *  52% – 74% → fondo + portal se disuelven → tunnel 3D aparece
  *
- * Constantes de calibración:
- *  OVERLAY_DESKTOP      → oscurecimiento base en desktop
- *  OVERLAY_MOBILE_EXTRA → extra en mobile
- *  SCALE_KEYFRAMES      → zoom no-lineal [progress → scale]
- *  HERO_FADE_IN / OUT   → rango de fade del fondo (reveal del tunnel)
- *  COPY_FADE_IN / OUT   → rango de fade del copy
- *  PULSE_MIN / MAX      → respiración del núcleo
+ * Capas (bottom → top):
+ *  HeroBackground  → imagen responsive + zoom
+ *  NucleusPulse    → glow radial violeta pulsante
+ *  EnergyFilaments → filamentos de energía dentro del portal
+ *  HeroOverlay     → velos de oscurecimiento + fades de borde
+ *  HeroContent     → copy DOM, desaparece antes que el fondo
  */
 
 import { useRef } from 'react'
@@ -35,12 +35,10 @@ import { FadeUp } from '@/components/ui/FadeUp'
 
 /* ── Constantes de calibración ───────────────────────────── */
 
-// Overlay de color
 const OVERLAY_DESKTOP      = 0.30
 const OVERLAY_MOBILE_EXTRA = 0.12
 
 // Zoom no-lineal: lento al inicio, acelera hacia el portal
-// [progress: 0 → 0.25 → 0.55 → 0.75] → [scale: 1 → 1.08 → 1.55 → 2.20]
 const SCALE_PROGRESS = [0,    0.25,  0.55,  0.75]
 const SCALE_VALUES   = [1,    1.08,  1.55,  2.20]
 
@@ -48,14 +46,18 @@ const SCALE_VALUES   = [1,    1.08,  1.55,  2.20]
 const HERO_FADE_START = 0.52
 const HERO_FADE_END   = 0.74
 
-// Copy: desaparece antes (el usuario ya está "entrando")
+// Copy: desaparece antes (el usuario empieza a entrar)
 const COPY_FADE_START = 0.08
 const COPY_FADE_END   = 0.26
 
-// Núcleo: respiración
-const PULSE_MIN      = 0.08
-const PULSE_MAX      = 0.20
-const PULSE_DURATION = 5      // segundos por ciclo
+// Núcleo: parámetros de respiración
+const PULSE_MIN      = 0.10
+const PULSE_MAX      = 0.22
+const PULSE_DURATION = 5.5   // segundos por ciclo
+const PULSE_DELAY    = 1.8   // el texto se asienta primero
+
+// Filamentos: aparecen después del núcleo
+const FILAMENT_DELAY = 2.5
 
 /* ── HeroBackground ──────────────────────────────────────── */
 function HeroBackground({ scale }: { scale: MotionValue<number> }) {
@@ -83,22 +85,72 @@ function HeroBackground({ scale }: { scale: MotionValue<number> }) {
 }
 
 /* ── NucleusPulse ────────────────────────────────────────── */
-// Halo radial violeta que respira independientemente del scroll.
-// Se desvanece junto con el fondo al entrar en el tunnel.
+// Glow radial violeta que empieza a respirar 1.8s después del mount.
+// El texto está asentado antes de que el portal tome protagonismo.
 function NucleusPulse() {
   return (
     <motion.div
       className="absolute inset-0 pointer-events-none"
-      style={{
-        background:
-          'radial-gradient(ellipse 52% 48% at 50% 50%, rgba(100,60,200,1) 0%, transparent 68%)',
-        filter: 'blur(48px)',
-      }}
+      initial={{ opacity: 0 }}
       animate={{ opacity: [PULSE_MIN, PULSE_MAX, PULSE_MIN] }}
       transition={{
         duration: PULSE_DURATION,
         repeat: Infinity,
         ease: 'easeInOut',
+        delay: PULSE_DELAY,
+      }}
+      style={{
+        background:
+          'radial-gradient(ellipse 52% 48% at 50% 50%, rgba(100,60,200,1) 0%, transparent 68%)',
+        filter: 'blur(48px)',
+      }}
+    />
+  )
+}
+
+/* ── EnergyFilaments ─────────────────────────────────────── */
+// Filamentos de energía luminosa contenidos dentro del área del portal.
+// Implementados con conic-gradient (rayos finos) + mask radial (contención)
+// + blur suave (difuminado orgánico). Opacidad máxima muy baja — presencia
+// sin estridencia. Aparecen 0.7s después del glow del núcleo.
+function EnergyFilaments() {
+  return (
+    <motion.div
+      className="absolute inset-0 pointer-events-none"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: [0, 0.55, 0.35, 0.60, 0.40, 0.55] }}
+      transition={{
+        duration: 9,
+        repeat: Infinity,
+        ease: 'easeInOut',
+        delay: FILAMENT_DELAY,
+        times: [0, 0.12, 0.35, 0.58, 0.80, 1],
+      }}
+      style={{
+        // Máscara radial — filamentos solo dentro del área del portal
+        maskImage:
+          'radial-gradient(ellipse 42% 40% at 50% 50%, black 10%, black 40%, transparent 65%)',
+        WebkitMaskImage:
+          'radial-gradient(ellipse 42% 40% at 50% 50%, black 10%, black 40%, transparent 65%)',
+        // Rayos finos cónicos — nervadura luminosa del portal
+        background: `conic-gradient(
+          from 12deg at 50% 50%,
+          transparent 0deg,   rgba(145,80,255,0.13) 2deg,   transparent 5deg,
+          transparent 22deg,  rgba(165,95,255,0.09) 24deg,  transparent 27deg,
+          transparent 46deg,  rgba(130,70,240,0.12) 48deg,  transparent 51deg,
+          transparent 74deg,  rgba(155,88,255,0.08) 76deg,  transparent 79deg,
+          transparent 102deg, rgba(140,80,255,0.11) 104deg, transparent 107deg,
+          transparent 128deg, rgba(160,90,255,0.09) 130deg, transparent 133deg,
+          transparent 158deg, rgba(135,75,250,0.13) 160deg, transparent 163deg,
+          transparent 188deg, rgba(148,83,255,0.08) 190deg, transparent 193deg,
+          transparent 218deg, rgba(155,88,255,0.10) 220deg, transparent 223deg,
+          transparent 248deg, rgba(138,78,245,0.12) 250deg, transparent 253deg,
+          transparent 278deg, rgba(162,92,255,0.07) 280deg, transparent 283deg,
+          transparent 308deg, rgba(142,80,255,0.11) 310deg, transparent 313deg,
+          transparent 338deg, rgba(150,85,255,0.09) 340deg, transparent 343deg,
+          transparent 360deg
+        )`,
+        filter: 'blur(2.5px)',
       }}
     />
   )
@@ -108,17 +160,15 @@ function NucleusPulse() {
 function HeroOverlay() {
   return (
     <>
-      {/* Velo base */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ background: `rgba(5,7,11,${OVERLAY_DESKTOP})` }}
       />
-      {/* Extra mobile */}
       <div
         className="absolute inset-0 pointer-events-none md:hidden"
         style={{ background: `rgba(5,7,11,${OVERLAY_MOBILE_EXTRA})` }}
       />
-      {/* Fade inferior — sella con la siguiente sección */}
+      {/* Fade inferior */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -126,7 +176,7 @@ function HeroOverlay() {
             'linear-gradient(to top, #05070B 10%, rgba(5,7,11,0.5) 44%, transparent 100%)',
         }}
       />
-      {/* Fade superior — sella con el nav */}
+      {/* Fade superior */}
       <div
         className="absolute inset-x-0 top-0 h-36 pointer-events-none"
         style={{ background: 'linear-gradient(to bottom, #05070B 0%, transparent 100%)' }}
@@ -163,7 +213,7 @@ function HeroContent({
       </FadeUp>
 
       <FadeUp delay={0.25}>
-        <p className="text-textSecondary text-lg md:text-xl max-w-2xl leading-relaxed mb-10">
+        <p className="text-textSecondary text-xl md:text-2xl max-w-2xl leading-relaxed mb-10">
           {c.subtitle}
         </p>
       </FadeUp>
@@ -189,28 +239,22 @@ function HeroContent({
 }
 
 /* ── Hero ────────────────────────────────────────────────── */
-// Contenedor de 250vh: 100vh sticky + 150vh de rango de scroll.
-// Cuando el hero se desvanece el Canvas 3D (z-0, fixed) queda expuesto.
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // scrollYProgress: 0 = hero entra en viewport, 1 = hero sale de viewport
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
   })
 
-  // Zoom no-lineal hacia el núcleo
   const bgScale = useTransform(scrollYProgress, SCALE_PROGRESS, SCALE_VALUES)
 
-  // Capas de fondo: se desvanecen juntas revelando el tunnel
   const heroLayersOpacity = useTransform(
     scrollYProgress,
     [HERO_FADE_START, HERO_FADE_END],
     [1, 0]
   )
 
-  // Copy: desaparece antes, sube levemente al irse
   const copyOpacity = useTransform(
     scrollYProgress,
     [COPY_FADE_START, COPY_FADE_END],
@@ -223,29 +267,26 @@ export default function Hero() {
   )
 
   return (
-    // 250vh: crea el rango de scroll para el efecto pinned
     <div ref={containerRef} style={{ height: '250vh' }}>
-
-      {/* Sección sticky — se queda fija en el viewport mientras scrolleas */}
       <section
         id="hero"
         className="sticky top-0 h-screen flex items-end pb-24 px-6 md:px-12"
         style={{ overflow: 'hidden' }}
       >
-        {/* Capas de fondo — se desvanecen juntas a ~0.74 */}
+        {/* Fondo + portal — se disuelven juntos a ~0.74 */}
         <motion.div
           className="absolute inset-0"
           style={{ opacity: heroLayersOpacity }}
         >
           <HeroBackground scale={bgScale} />
           <NucleusPulse />
+          <EnergyFilaments />
           <HeroOverlay />
         </motion.div>
 
         {/* Copy — desaparece antes a ~0.26 */}
         <HeroContent opacity={copyOpacity} y={copyY} />
       </section>
-
     </div>
   )
 }
