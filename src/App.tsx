@@ -2,20 +2,18 @@
  * Raíz de la aplicación.
  *
  * AppInner monta los hooks globales en orden:
- *  1. useLenis          → scroll suavizado
- *  2. useScrollProgress → progreso 0–1 al sceneStore
- *  3. useDeviceTier     → tier del dispositivo al uiStore
- *  4. useSectionMode    → sección activa + colorMode al sceneStore
+ *  1. useLenis               → scroll suavizado
+ *  2. useScrollProgress      → progreso 0–1 al sceneStore
+ *  3. useDeviceTier          → tier del dispositivo al uiStore
+ *  4. useScrollOrchestration → sección activa + estado completo de escena
  *
  * La escena 3D (SceneCanvas) se renderiza en z-index 0 como
  * fondo fijo. El contenido HTML vive encima en z-index 10.
  *
- * SECTION_MODES define qué colorMode activa cada sección.
- * La detección se hace con IntersectionObserver para evitar
- * cálculos de scroll en cada frame.
+ * ContactBurstOverlay añade un halo blanco sobre la escena al llegar
+ * a la sección contact, sin pasar por el pipeline 3D.
  */
 
-import { useEffect } from 'react'
 import BaseLayout from '@/components/layout/BaseLayout'
 import SceneCanvas from '@/components/scene/SceneCanvas'
 import Hero from '@/components/sections/Hero'
@@ -28,79 +26,49 @@ import Contact from '@/components/sections/Contact'
 import { useLenis } from '@/hooks/useLenis'
 import { useScrollProgress } from '@/hooks/useScrollProgress'
 import { useDeviceTier } from '@/hooks/useDeviceTier'
+import { useScrollOrchestration } from '@/hooks/useScrollOrchestration'
 import { useSceneStore } from '@/store/sceneStore'
-import type { ColorMode, SceneSection } from '@/types/scene'
-
-// Mapa sección → color de acento de la escena 3D
-const SECTION_MODES: { id: SceneSection; color: ColorMode }[] = [
-  { id: 'hero',         color: 'cyan'    },
-  { id: 'evidence',     color: 'cyan'    },
-  { id: 'capabilities', color: 'purple'  },
-  { id: 'thinking',     color: 'purple'  },
-  { id: 'about',        color: 'orange'  },
-  { id: 'standards',    color: 'neutral' },
-  { id: 'contact',      color: 'white'   },
-]
 
 /**
- * Hook que observa qué sección está más visible en pantalla
- * y actualiza colorMode + activeSection en sceneStore.
+ * Overlay HTML que aparece gradualmente al entrar en la sección contact.
  *
- * Se usa IntersectionObserver con dos umbrales (0.15 y 0.4)
- * para detectar la sección más intersectada en cada cambio.
+ * Es un halo radial blanco-azulado centrado en la parte baja de pantalla.
+ * La opacidad viene de contactBurstProgress (0→1) para que la transición
+ * sea suave y proporcional al scroll, sin depender del pipeline 3D.
+ *
+ * z-index 5 — por encima del Canvas (z-0) pero debajo del contenido (z-10).
  */
-function useSectionMode() {
-  const setColorMode     = useSceneStore((s) => s.setColorMode)
-  const setActiveSection = useSceneStore((s) => s.setActiveSection)
+function ContactBurstOverlay() {
+  const burst = useSceneStore((s) => s.contactBurstProgress)
+  if (burst < 0.01) return null
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Elegir la sección con mayor ratio de intersección
-        let best: string | null = null
-        let bestRatio = 0
-        entries.forEach((e) => {
-          if (e.intersectionRatio > bestRatio) {
-            bestRatio = e.intersectionRatio
-            best = e.target.id
-          }
-        })
-        if (best) {
-          const match = SECTION_MODES.find((s) => s.id === best)
-          if (match) {
-            setColorMode(match.color)
-            setActiveSection(match.id)
-          }
-        }
-      },
-      { threshold: [0.15, 0.4] }
-    )
-
-    // Pequeño delay para garantizar que las secciones están montadas en el DOM
-    const timer = setTimeout(() => {
-      SECTION_MODES.forEach(({ id }) => {
-        const el = document.getElementById(id)
-        if (el) observer.observe(el)
-      })
-    }, 200)
-
-    return () => {
-      clearTimeout(timer)
-      observer.disconnect()
-    }
-  }, [setColorMode, setActiveSection])
+  return (
+    <div
+      className="fixed inset-0 pointer-events-none"
+      style={{
+        zIndex: 5,
+        // Halo radial centrado-inferior — simula una fuente de luz blanca lejana
+        background: `radial-gradient(ellipse 80% 50% at 50% 85%,
+          rgba(190, 210, 230, ${burst * 0.13}) 0%,
+          transparent 70%)`,
+      }}
+    />
+  )
 }
 
 function AppInner() {
   useLenis()
   useScrollProgress()
   useDeviceTier()
-  useSectionMode()
+  useScrollOrchestration()  // reemplaza useSectionMode — orquesta el estado completo
 
   return (
     <>
       {/* Escena 3D — fondo fijo, z-index 0 */}
       <SceneCanvas />
+
+      {/* Halo blanco de contact — z-index 5, entre Canvas y contenido */}
+      <ContactBurstOverlay />
 
       {/* Contenido HTML — encima de la escena, z-index 10 via BaseLayout */}
       <BaseLayout>
