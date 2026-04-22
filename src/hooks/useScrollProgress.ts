@@ -18,8 +18,9 @@
 import { useEffect } from 'react'
 import { useSceneStore } from '@/store/sceneStore'
 
-// El hero ocupa exactamente 100vh → offset = 1 × innerHeight
-const getHeroOffset = () => window.innerHeight
+// El hero ocupa 100vh pero la cámara empieza a moverse antes (0.7×)
+// para que el tunnel ya esté vivo mientras el hero se termina de disolver.
+const getHeroOffset = () => window.innerHeight * 0.7
 
 export function useScrollProgress() {
   const setProgress = useSceneStore((s) => s.setProgress)
