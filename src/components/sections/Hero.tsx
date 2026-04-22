@@ -3,25 +3,24 @@
  *
  * Estructura interna:
  *  - HeroBackground  → imagen responsive (picture) con push-in de scroll
+ *  - NucleusPulse    → glow radial violeta animado sobre el centro del asset
  *  - HeroOverlay     → capas de oscurecimiento para legibilidad del copy
  *  - HeroContent     → copy con animaciones de entrada staggeradas
  *
  * Comportamiento de scroll:
- *  El fondo escala muy lentamente de 1.0 → PUSH_IN_SCALE mientras el hero
- *  está en el viewport. La sensación buscada es "entrar al sistema",
- *  no "zoom a una imagen". Factor máximo deliberadamente contenido.
+ *  El fondo escala de 1.0 → PUSH_IN_SCALE mientras el hero está en viewport.
+ *  La sensación es absorción subconsciente, no zoom evidente.
  *
- * Assets:
- *  /assets/generated/hero/hero-desktop.webp  → ≥ 768px
- *  /assets/generated/hero/hero-mobile.webp   → < 768px
+ * NucleusPulse:
+ *  Capa radial violeta de baja opacidad que respira suavemente (0.08 ↔ 0.18).
+ *  No toca el asset, solo vive encima como un halo de energía contenida.
  *
- * Fallback seguro: si los assets no están, el hero funciona con
- *  solo el overlay de color de fondo + copy.
- *
- * Constantes de overlay ajustables sin tocar el JSX:
- *  OVERLAY_DESKTOP → opacidad del velo negro en desktop (0.30–0.40)
- *  OVERLAY_MOBILE  → opacidad adicional en mobile (suma sobre desktop)
- *  PUSH_IN_SCALE   → escala máxima del push-in (nunca superar 1.10)
+ * Constantes ajustables:
+ *  OVERLAY_DESKTOP      → velo negro base en desktop (0.28–0.36)
+ *  OVERLAY_MOBILE_EXTRA → oscurecimiento adicional en mobile
+ *  PUSH_IN_SCALE        → escala máxima del push-in (no superar 1.06)
+ *  PULSE_MIN / PULSE_MAX → rango de respiración del núcleo
+ *  PULSE_DURATION        → duración de un ciclo completo en segundos
  */
 
 import { useRef } from 'react'
@@ -30,28 +29,36 @@ import { siteCopy } from '@/content/siteCopy'
 import { FadeUp } from '@/components/ui/FadeUp'
 
 /* ── Constantes ajustables ───────────────────────────────── */
-const OVERLAY_DESKTOP = 0.36   // velo base — desktop (0.30–0.40)
-const OVERLAY_MOBILE_EXTRA = 0.12  // opacidad extra en mobile (suma: 0.36+0.12 = 0.48)
-const PUSH_IN_SCALE   = 1.07   // escala máxima del push-in al scrollear
+const OVERLAY_DESKTOP      = 0.30   // desktop: núcleo más visible (era 0.36)
+const OVERLAY_MOBILE_EXTRA = 0.12   // mobile: suma → 0.42
+const PUSH_IN_SCALE        = 1.04   // push-in muy sutil: 1.0 → 1.04
+const PULSE_MIN            = 0.08   // opacidad mínima del glow del núcleo
+const PULSE_MAX            = 0.18   // opacidad máxima del glow del núcleo
+const PULSE_DURATION       = 5      // segundos por ciclo de respiración
 
 /* ── HeroBackground ──────────────────────────────────────── */
 // Imagen responsive dentro de un motion.div que escala con scroll.
-// La imagen está sobredimensionada (scale > 1 al final) así que
-// se usa object-cover para que nunca queden bordes vacíos.
-function HeroBackground({ scale, y }: { scale: ReturnType<typeof useTransform>; y: ReturnType<typeof useTransform> }) {
+// object-cover garantiza que nunca haya bordes vacíos aunque scale > 1.
+function HeroBackground({
+  scale,
+  y,
+}: {
+  scale: ReturnType<typeof useTransform>
+  y: ReturnType<typeof useTransform>
+}) {
   return (
     <motion.div
       className="absolute inset-0"
       style={{ scale, y, willChange: 'transform', transformOrigin: 'center center' }}
     >
       <picture>
-        {/* Desktop: ≥ 768px → imagen wide con cámara centrada */}
+        {/* Desktop ≥ 768px */}
         <source
           media="(min-width: 768px)"
           srcSet="/assets/generated/hero/hero-desktop.webp"
           type="image/webp"
         />
-        {/* Mobile: imagen vertical optimizada para composición en pantalla angosta */}
+        {/* Mobile < 768px */}
         <img
           src="/assets/generated/hero/hero-mobile.webp"
           alt=""
@@ -64,36 +71,61 @@ function HeroBackground({ scale, y }: { scale: ReturnType<typeof useTransform>; 
   )
 }
 
+/* ── NucleusPulse ────────────────────────────────────────── */
+// Halo radial violeta animado centrado en el núcleo del asset.
+// No modifica el asset — es una capa CSS encima que "respira".
+// blur alto + opacidad baja = presencia sin estridencia.
+function NucleusPulse() {
+  return (
+    <motion.div
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        background:
+          'radial-gradient(ellipse 52% 48% at 50% 50%, rgba(100,60,200,1) 0%, transparent 68%)',
+        filter: 'blur(48px)',
+      }}
+      animate={{ opacity: [PULSE_MIN, PULSE_MAX, PULSE_MIN] }}
+      transition={{
+        duration: PULSE_DURATION,
+        repeat: Infinity,
+        ease: 'easeInOut',
+        // sin delay: empieza cargado desde el principio
+      }}
+    />
+  )
+}
+
 /* ── HeroOverlay ─────────────────────────────────────────── */
-// Tres capas:
-//  1. Velo oscuro plano para controlar exposición del asset
-//  2. Extra oscurecimiento en mobile (texto más corto, imagen más intensa)
-//  3. Gradiente inferior → funde con el fondo negro de la siguiente sección
-//  4. Gradiente superior → evita corte brusco con el nav transparente
+// Capas de oscurecimiento en orden:
+//  1. Velo plano base — controla exposición del asset
+//  2. Extra mobile — mayor opacidad en pantallas pequeñas
+//  3. Gradiente inferior — funde con el fondo de la siguiente sección
+//  4. Gradiente superior — sella el borde con el nav transparente
 function HeroOverlay() {
   return (
     <>
-      {/* Velo base — desktop */}
+      {/* Velo base */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ background: `rgba(5,7,11,${OVERLAY_DESKTOP})` }}
       />
 
-      {/* Velo adicional mobile — solo en pantallas pequeñas */}
+      {/* Extra mobile */}
       <div
         className="absolute inset-0 pointer-events-none md:hidden"
         style={{ background: `rgba(5,7,11,${OVERLAY_MOBILE_EXTRA})` }}
       />
 
-      {/* Fade inferior — disuelve hacia la siguiente sección */}
+      {/* Fade inferior — disolución hacia la siguiente sección */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'linear-gradient(to top, #05070B 8%, rgba(5,7,11,0.55) 45%, transparent 100%)',
+          background:
+            'linear-gradient(to top, #05070B 10%, rgba(5,7,11,0.5) 44%, transparent 100%)',
         }}
       />
 
-      {/* Fade superior — suaviza el borde con el nav */}
+      {/* Fade superior — sella el nav */}
       <div
         className="absolute inset-x-0 top-0 h-36 pointer-events-none"
         style={{ background: 'linear-gradient(to bottom, #05070B 0%, transparent 100%)' }}
@@ -103,9 +135,8 @@ function HeroOverlay() {
 }
 
 /* ── HeroContent ─────────────────────────────────────────── */
-// Copy anclado en la parte inferior del hero.
-// Cada elemento entra con FadeUp staggerado para dar ritmo de lectura.
-// max-w-4xl en el h1 evita líneas demasiado largas en pantallas anchas.
+// Copy anclado en la parte inferior — no se mueve con el fondo.
+// FadeUp staggerado: eyebrow → headline → subtitle → CTAs.
 function HeroContent() {
   const c = siteCopy.hero
 
@@ -152,24 +183,21 @@ function HeroContent() {
 }
 
 /* ── Hero ────────────────────────────────────────────────── */
-// Orquesta el fondo, el overlay y el contenido.
-// useScroll con target + offset=['start start','end start'] captura
-// exactamente el rango en que el hero ocupa la pantalla.
+// Orquesta las cuatro capas en orden visual:
+//  HeroBackground (push-in) → NucleusPulse → HeroOverlay → HeroContent
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
 
-  // Progreso de scroll dentro del hero (0 = el top del hero toca el top de la pantalla)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end start'],
   })
 
-  // Push-in: escala muy suave, nunca agresiva
+  // Push-in extremadamente contenido: 1.0 → 1.04
   const bgScale = useTransform(scrollYProgress, [0, 1], [1, PUSH_IN_SCALE])
 
-  // Leve deriva en Y: el fondo sube un poco mientras el hero sale de vista
-  // Esto refuerza la sensación de profundidad sin movimiento evidente
-  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '-3%'])
+  // Deriva vertical mínima — profundidad sin movimiento obvio
+  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '-2%'])
 
   return (
     <section
@@ -177,7 +205,9 @@ export default function Hero() {
       id="hero"
       className="relative min-h-screen flex items-end pb-24 px-6 md:px-12 overflow-hidden"
     >
+      {/* Orden de capas: fondo → pulso → velo → copy */}
       <HeroBackground scale={bgScale} y={bgY} />
+      <NucleusPulse />
       <HeroOverlay />
       <HeroContent />
     </section>
