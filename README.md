@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+# vladmarinovich.com
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sitio de presentación personal. Infraestructura digital, estrategia y ejecución.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19** + **TypeScript**
+- **Vite 8**
+- **Tailwind CSS v3** — tokens de diseño personalizados
+- **React Three Fiber** — escena 3D de fondo (corredor arquitectónico)
+- **Framer Motion** — transiciones de UI
+- **Zustand** — estado global (escena, casos, interfaz)
+- **Lenis** — scroll suavizado
 
-## React Compiler
+## Estructura
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── components/
+│   ├── layout/       # BaseLayout
+│   ├── nav/          # Nav con frosted glass
+│   ├── scene/        # SceneCanvas — corredor 3D
+│   └── sections/     # Hero, Evidence, Capabilities, Thinking, About, Standards, Contact
+├── content/          # Copy del sitio y casos de estudio
+├── hooks/            # useLenis, useScrollProgress, useDeviceTier, useReducedMotion
+├── lib/              # sectionRanges
+├── store/            # sceneStore, caseStore, uiStore
+└── types/            # SceneSection, ColorMode, DeviceTier, CaseStudy
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Fases
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Fase | Estado | Descripción |
+|------|--------|-------------|
+| 1 — Scaffold | ✅ | Configuración, tipos, stores, hooks, contenido, secciones base |
+| 2 — Escena 3D | ✅ | Corredor arquitectónico oscuro con anillos reactivos al scroll |
+| 3 — Scroll | 🔜 | Orquestación GSAP + ScrollTrigger |
+| 4 — Evidence | 🔜 | Panel editorial de casos de estudio |
+| 5 — About + Contact | 🔜 | Retrato y transición white burst |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Desarrollo
+
+```bash
+npm install
+npm run dev
 ```
+
+## Estrategia de ramas
+
+- `main` — producción estable
+- `feat/fase-N-[nombre]` — una rama por fase
