@@ -49,7 +49,7 @@ export default function Nav() {
           <img
             src="/assets/images/logo.svg"
             alt={siteCopy.nav.brand}
-            className="h-6 w-auto"
+            className="h-16 w-auto"
           />
         </a>
 
@@ -60,7 +60,7 @@ export default function Nav() {
               key={link.id}
               href={`#${link.id}`}
               onClick={(e) => handleAnchor(e, `#${link.id}`)}
-              className="font-mono text-xs tracking-[0.15em] text-textSecondary hover:text-textPrimary transition-colors uppercase"
+              className="font-mono text-sm tracking-[0.12em] text-textSecondary hover:text-textPrimary transition-colors uppercase"
             >
               {link.label}
             </a>
@@ -71,7 +71,7 @@ export default function Nav() {
         <a
           href="#contact"
           onClick={(e) => handleAnchor(e, '#contact')}
-          className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-md border border-white/10 bg-white/[0.03] font-mono text-xs tracking-[0.15em] text-textSecondary hover:text-textPrimary hover:border-white/20 transition-all uppercase"
+          className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-md border border-white/15 bg-white/[0.03] font-mono text-sm tracking-[0.12em] text-textSecondary hover:text-textPrimary hover:border-white/25 transition-all uppercase"
         >
           {siteCopy.nav.cta}
         </a>
