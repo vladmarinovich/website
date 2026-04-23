@@ -7,9 +7,13 @@
  *
  * Capas (fondo → frente):
  *  1. HeroBackground  → imagen responsive, zoom scroll-driven
- *  2. NucleusPulse    → glow radial violeta, respira desde 1.8s
- *  3. PortalPulse      → activación estructural: anillos orgánicos + pulsos (2.0s)
- *  4. HeroOverlay     → velos de oscurecimiento + fades de borde
+ *  2. PortalPulse     → núcleo amorfo vivo (2.0s) — atmósfera y dive
+ *  3. HeroOverlay     → velos de oscurecimiento + fades de borde
+ *
+ * El antiguo NucleusPulse (glow radial violeta) se eliminó —
+ * competía con PortalPulse en el mismo color y zona sin aportar
+ * profundidad. Menos es más: un solo elemento orgánico carga
+ * la atmósfera completa.
  *
  * Timing de fade (scrollY relativo a viewport height):
  *  opacity 1 → 0  entre  0.55vh y 1.0vh
@@ -36,12 +40,7 @@ const FADE_END   = VH * 1.0
 const OVERLAY_DESKTOP      = 0.30
 const OVERLAY_MOBILE_EXTRA = 0.12
 
-const PULSE_MIN      = 0.10
-const PULSE_MAX      = 0.24
-const PULSE_ANIM_DURATION = 5.5  // segundos — para Framer Motion
-const PULSE_DELAY    = 1.8   // espera que el texto se asiente primero
-
-const FILAMENT_DELAY = 2.0   // 0.2s después del glow
+const FILAMENT_DELAY = 2.0   // activación del núcleo (tras el asentamiento del texto)
 
 /* ── HeroBackground ──────────────────────────────────────── */
 function HeroBackground({ scale }: { scale: MotionValue<number> }) {
@@ -65,30 +64,6 @@ function HeroBackground({ scale }: { scale: MotionValue<number> }) {
         />
       </picture>
     </motion.div>
-  )
-}
-
-/* ── NucleusPulse ────────────────────────────────────────── */
-// Glow central que empieza dormido y activa 1.8s después del mount.
-// Texto ya está asentado cuando el portal "despierta".
-function NucleusPulse() {
-  return (
-    <motion.div
-      className="absolute inset-0 pointer-events-none"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: [PULSE_MIN, PULSE_MAX, PULSE_MIN] }}
-      transition={{
-        duration: PULSE_ANIM_DURATION,
-        repeat: Infinity,
-        ease: 'easeInOut',
-        delay: PULSE_DELAY,
-      }}
-      style={{
-        background:
-          'radial-gradient(ellipse 52% 48% at 50% 50%, rgba(100,60,200,1) 0%, transparent 68%)',
-        filter: 'blur(48px)',
-      }}
-    />
   )
 }
 
@@ -344,7 +319,6 @@ export default function HeroLayers() {
       style={{ zIndex: 1, opacity: heroOpacity }}
     >
       <HeroBackground scale={bgScale} />
-      <NucleusPulse />
       <PortalPulse />
       <HeroOverlay />
     </motion.div>
