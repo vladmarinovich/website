@@ -18,25 +18,30 @@
 import { useEffect } from 'react'
 import { useSceneStore } from '@/store/sceneStore'
 
-// El hero ocupa 100vh pero la cámara empieza a moverse antes (0.7×)
-// para que el tunnel ya esté vivo mientras el hero se termina de disolver.
 const getHeroOffset = () => window.innerHeight * 0.7
 
 export function useScrollProgress() {
-  const setProgress = useSceneStore((s) => s.setProgress)
+  const setProgress               = useSceneStore((s) => s.setProgress)
+  const setHeroTransitionProgress = useSceneStore((s) => s.setHeroTransitionProgress)
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop  = window.scrollY
       const maxScroll  = document.body.scrollHeight - window.innerHeight
       const heroOffset = getHeroOffset()
+      const VH         = window.innerHeight
 
-      // La cámara empieza a moverse después del hero
+      // Progreso principal de cámara (empieza tras el hero)
       const effectiveTop = Math.max(0, scrollTop - heroOffset)
       const effectiveMax = Math.max(1, maxScroll - heroOffset)
-      const progress     = effectiveTop / effectiveMax
+      setProgress(Math.max(0, Math.min(1, effectiveTop / effectiveMax)))
 
-      setProgress(Math.max(0, Math.min(1, progress)))
+      // Progreso de transición del hero: 0→1 durante el fade (0.55vh → 1.0vh)
+      // Dispara el dive de la cámara y la expansión del FOV en SceneCanvas.
+      const fadeStart = VH * 0.55
+      const fadeEnd   = VH * 1.00
+      const heroTrans = Math.max(0, Math.min(1, (scrollTop - fadeStart) / (fadeEnd - fadeStart)))
+      setHeroTransitionProgress(heroTrans)
     }
 
     handleScroll()
@@ -47,5 +52,5 @@ export function useScrollProgress() {
       window.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleScroll)
     }
-  }, [setProgress])
+  }, [setProgress, setHeroTransitionProgress])
 }
