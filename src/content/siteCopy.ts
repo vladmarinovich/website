@@ -10,10 +10,10 @@ export const siteCopy = {
   nav: {
     brand: 'Vlad Marinovich',
     links: [
-      { id: 'evidence',     label: 'Work'      },
-      { id: 'thinking',     label: 'Thinking'  },
-      { id: 'about',        label: 'About'     },
-      { id: 'contact',      label: 'Contact'   },
+      { id: 'evidence',     label: 'Trabajo'   },
+      { id: 'thinking',     label: 'Criterio'  },
+      { id: 'about',        label: 'Sobre mí'  },
+      { id: 'contact',      label: 'Contacto'  },
     ],
     cta: 'Agendar llamada',
   },
@@ -42,7 +42,7 @@ export const siteCopy = {
   },
 
   capabilities: {
-    eyebrow: 'CAPABILITIES',
+    eyebrow: 'CAPACIDADES',
     title:   'No servicios. Capas de intervención.',
     body:    'Cada compromiso empieza igual: primero entiendo el sistema. Después decido qué conviene construir, qué conviene conectar y qué conviene eliminar.',
     items: [
@@ -66,7 +66,7 @@ export const siteCopy = {
   },
 
   thinking: {
-    eyebrow: 'THINKING',
+    eyebrow: 'CRITERIO',
     title:   'La diferencia no es hacer más. Es ver mejor.',
     body:    'La mayoría ejecuta demasiado pronto. Yo prefiero detectar primero qué tiene sentido construir, qué puede escalar y qué solo va a producir ruido.',
     principles: [
@@ -90,7 +90,7 @@ export const siteCopy = {
   },
 
   about: {
-    eyebrow:       'ABOUT',
+    eyebrow:       'SOBRE MÍ',
     title:         'Humano por fuera. Sistémico por dentro.',
     bodyPrimary:   'Pienso como partner, no como proveedor. Entro para entender el mapa completo, detectar lo que importa y construir la estructura correcta para moverlo.',
     bodySecondary: 'Construyo antes de vender. Salvando Patitas no es un discurso sobre impacto. Es la prueba de que cuando algo importa de verdad, también se puede diseñar con rigor.',
@@ -98,7 +98,7 @@ export const siteCopy = {
   },
 
   standards: {
-    eyebrow:  'STANDARDS',
+    eyebrow:  'ESTÁNDARES',
     title:    'Esto funciona mejor con ambición real.',
     body:     'Trabajo mejor con founders, líderes, empresas y fundaciones que no están buscando alguien que ejecute, sino alguien que entienda el sistema, tome criterio y lo convierta en estructura.',
     yesTitle: 'Con quién sí',
@@ -118,7 +118,7 @@ export const siteCopy = {
   },
 
   contact: {
-    eyebrow:    'CONTACT',
+    eyebrow:    'CONTACTO',
     title:      'Si llegaste hasta aquí, probablemente ya entendiste el nivel.',
     body:       'No necesitas un pitch. Solo una conversación honesta sobre lo que quieres resolver y si soy la persona correcta para construirlo contigo.',
     ctaPrimary:  'Agendar una llamada',

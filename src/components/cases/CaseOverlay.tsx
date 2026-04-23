@@ -155,7 +155,7 @@ export function CaseOverlay() {
                     {activeCase.stack && activeCase.stack.length > 0 && (
                       <div className="mt-10 pt-8 border-t border-white/[0.06]">
                         <p className="font-mono text-xs tracking-[0.22em] text-textSecondary/40 uppercase mb-4">
-                          Stack
+                          Tecnologías
                         </p>
                         <div className="flex flex-wrap gap-2">
                           {activeCase.stack.map((tool) => (

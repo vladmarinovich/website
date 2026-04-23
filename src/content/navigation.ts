@@ -7,8 +7,8 @@
  */
 
 export const navigation = [
-  { id: 'evidence',     label: 'Work',      href: '#evidence'     },
-  { id: 'thinking',     label: 'Thinking',  href: '#thinking'     },
-  { id: 'about',        label: 'About',     href: '#about'        },
-  { id: 'contact',      label: 'Contact',   href: '#contact'      },
+  { id: 'evidence',     label: 'Trabajo',   href: '#evidence'     },
+  { id: 'thinking',     label: 'Criterio',  href: '#thinking'     },
+  { id: 'about',        label: 'Sobre mí',  href: '#about'        },
+  { id: 'contact',      label: 'Contacto',  href: '#contact'      },
 ]
