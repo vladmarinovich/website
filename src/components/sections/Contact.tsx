@@ -110,7 +110,7 @@ export default function Contact() {
           <div className="flex flex-wrap gap-4 justify-center mb-8">
             {/* CTA primario — fondo oscuro para contrastar con la luz central */}
             <a
-              href="https://cal.com/vladmarinovich"
+              href="https://wa.link/ohnau7"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 bg-white text-black font-mono text-sm tracking-[0.14em] uppercase rounded-sm hover:bg-white/90 transition-colors shadow-[0_0_40px_rgba(255,255,255,0.25)]"
