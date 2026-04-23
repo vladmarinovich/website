@@ -11,20 +11,31 @@
 
 import { useEffect } from 'react'
 import Lenis from 'lenis'
+import { useCaseStore } from '@/store/caseStore'
 
 export function useLenis() {
   useEffect(() => {
-    // Instancia Lenis con scroll suave en rueda del mouse
     const lenis = new Lenis({ duration: 1.1, smoothWheel: true })
 
-    // Loop de animación — Lenis necesita raf() en cada frame
+    // Pausar/reanudar Lenis cuando el overlay de casos abre o cierra.
+    // Sin esto, Lenis intercepta el scroll del window y el overlay
+    // no puede hacer scroll de su propio contenido.
+    const unsubscribe = useCaseStore.subscribe(
+      (state) => {
+        if (state.isCaseOpen) lenis.stop()
+        else lenis.start()
+      }
+    )
+
     function raf(time: number) {
       lenis.raf(time)
       requestAnimationFrame(raf)
     }
     requestAnimationFrame(raf)
 
-    // Limpieza al desmontar el componente
-    return () => { lenis.destroy() }
+    return () => {
+      lenis.destroy()
+      unsubscribe()
+    }
   }, [])
 }
