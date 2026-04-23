@@ -5,14 +5,19 @@
  * Los indicadores son puntos de 4px para máxima limpieza visual.
  */
 
+import { useRef } from 'react'
+import { motion } from 'framer-motion'
 import { siteCopy } from '@/content/siteCopy'
+import { useSectionOpacity } from '@/hooks/useSectionOpacity'
 import { FadeUp } from '@/components/ui/FadeUp'
 
 export default function Standards() {
+  const ref     = useRef<HTMLElement>(null)
+  const opacity  = useSectionOpacity(ref)
   const c = siteCopy.standards
 
   return (
-    <section id="standards" className="relative min-h-screen py-32 px-6 md:px-12">
+    <motion.section id="standards" ref={ref} className="relative min-h-screen py-32 px-6 md:px-12" style={{ opacity }}>
       <div className="max-w-7xl mx-auto">
 
         <FadeUp>
@@ -64,6 +69,6 @@ export default function Standards() {
 
         </div>
       </div>
-    </section>
+    </motion.section>
   )
 }

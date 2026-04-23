@@ -8,14 +8,19 @@
  * títulos de principio con más peso visual.
  */
 
+import { useRef } from 'react'
+import { motion } from 'framer-motion'
 import { siteCopy } from '@/content/siteCopy'
+import { useSectionOpacity } from '@/hooks/useSectionOpacity'
 import { FadeUp } from '@/components/ui/FadeUp'
 
 export default function Thinking() {
+  const ref     = useRef<HTMLElement>(null)
+  const opacity  = useSectionOpacity(ref)
   const c = siteCopy.thinking
 
   return (
-    <section id="thinking" className="relative min-h-screen py-32 px-6 md:px-12">
+    <motion.section id="thinking" ref={ref} className="relative min-h-screen py-32 px-6 md:px-12" style={{ opacity }}>
       <div className="max-w-7xl mx-auto">
 
         <FadeUp>
@@ -51,6 +56,6 @@ export default function Thinking() {
         </div>
 
       </div>
-    </section>
+    </motion.section>
   )
 }

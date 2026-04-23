@@ -4,20 +4,32 @@
  * Grid de 3 CaseCards que abren el overlay editorial al hacer click.
  * El CaseOverlay vive en App.tsx (fuera de esta sección) para que
  * el fixed positioning opere desde el contexto raíz.
+ *
+ * Fade in/out: la sección aparece y desaparece sobre el tunnel 3D.
  */
 
+import { useRef } from 'react'
+import { motion } from 'framer-motion'
 import { siteCopy } from '@/content/siteCopy'
 import { cases } from '@/content/cases'
 import { useCaseStore } from '@/store/caseStore'
 import { FadeUp } from '@/components/ui/FadeUp'
 import { CaseCard } from '@/components/cases/CaseCard'
+import { useSectionOpacity } from '@/hooks/useSectionOpacity'
 
 export default function Evidence() {
-  const c       = siteCopy.evidence
+  const c        = siteCopy.evidence
   const openCase = useCaseStore((s) => s.openCase)
+  const ref      = useRef<HTMLElement>(null)
+  const opacity  = useSectionOpacity(ref)
 
   return (
-    <section id="evidence" className="relative min-h-screen py-32 px-6 md:px-12">
+    <motion.section
+      id="evidence"
+      ref={ref}
+      className="relative min-h-screen py-32 px-6 md:px-12"
+      style={{ opacity }}
+    >
       <div className="max-w-7xl mx-auto">
 
         {/* Encabezado */}
@@ -46,6 +58,6 @@ export default function Evidence() {
         </div>
 
       </div>
-    </section>
+    </motion.section>
   )
 }

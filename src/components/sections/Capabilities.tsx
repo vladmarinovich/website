@@ -10,14 +10,19 @@
  * Legibilidad: body text a text-xl, items de grilla a text-base.
  */
 
+import { useRef } from 'react'
+import { motion } from 'framer-motion'
 import { siteCopy } from '@/content/siteCopy'
+import { useSectionOpacity } from '@/hooks/useSectionOpacity'
 import { FadeUp } from '@/components/ui/FadeUp'
 
 export default function Capabilities() {
+  const ref     = useRef<HTMLElement>(null)
+  const opacity  = useSectionOpacity(ref)
   const c = siteCopy.capabilities
 
   return (
-    <section id="capabilities" className="relative min-h-screen py-32 px-6 md:px-12">
+    <motion.section id="capabilities" ref={ref} className="relative min-h-screen py-32 px-6 md:px-12" style={{ opacity }}>
       <div className="max-w-7xl mx-auto">
 
         <FadeUp>
@@ -47,6 +52,6 @@ export default function Capabilities() {
         </div>
 
       </div>
-    </section>
+    </motion.section>
   )
 }

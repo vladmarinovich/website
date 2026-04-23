@@ -3,20 +3,9 @@
 @tailwind utilities;
 
 @layer base {
-  html {
-    background: #05070B;
-    color: #F5F7FA;
-    /* Scroll section-by-section — cada sección es un slide vertical */
-    scroll-snap-type: y mandatory;
-  }
+  html { background: #05070B; color: #F5F7FA; }
   body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
   ::selection { background: #63D7FF; color: #05070B; }
-
-  /* Cada sección es un punto de snap — el scroll salta de sección en sección */
-  section[id] {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-  }
 }
 
 /* Grain overlay */
