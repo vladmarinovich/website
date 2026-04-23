@@ -58,7 +58,7 @@ export default function About() {
               </h2>
             </FadeUp>
             <FadeUp kind="body" delay={0.20}>
-              <p className="text-textSecondary text-lg md:text-xl leading-[1.65] mb-6 max-w-lg">
+              <p className="drop-cap text-textSecondary text-lg md:text-xl leading-[1.65] mb-6 max-w-lg">
                 {c.bodyPrimary}
               </p>
             </FadeUp>
@@ -69,7 +69,7 @@ export default function About() {
             </FadeUp>
             <FadeUp kind="body" delay={0.36}>
               <blockquote className="border-l-2 border-accent-orange pl-6 text-textPrimary italic text-lg md:text-xl leading-[1.55] max-w-lg">
-                "{c.quote}"
+                « {c.quote} »
               </blockquote>
             </FadeUp>
           </div>
