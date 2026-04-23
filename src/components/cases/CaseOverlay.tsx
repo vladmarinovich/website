@@ -51,7 +51,7 @@ function CopySection({
 function Metric({ metric }: { metric: CaseMetric }) {
   return (
     <div>
-      <p className="text-2xl font-bold text-textPrimary mb-1 leading-none">
+      <p className="tabular-nums text-2xl font-bold text-textPrimary mb-1 leading-none">
         {metric.value}
       </p>
       <p className="font-mono text-xs text-textSecondary/50 tracking-wide leading-tight">
