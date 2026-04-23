@@ -150,6 +150,25 @@ export function CaseOverlay() {
                         ))}
                       </div>
                     )}
+
+                    {/* Stack de herramientas */}
+                    {activeCase.stack && activeCase.stack.length > 0 && (
+                      <div className="mt-10 pt-8 border-t border-white/[0.06]">
+                        <p className="font-mono text-xs tracking-[0.22em] text-textSecondary/40 uppercase mb-4">
+                          Stack
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {activeCase.stack.map((tool) => (
+                            <span
+                              key={tool}
+                              className="font-mono text-xs text-textSecondary/60 border border-white/[0.08] px-3 py-1 rounded-sm tracking-wide"
+                            >
+                              {tool}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* ── Columna derecha: screenshots ── */}

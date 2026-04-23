@@ -30,4 +30,5 @@ export type CaseStudy = {
   strategicRead: string  // Lectura estratégica del caso
   metrics?: CaseMetric[]
   assets: CaseAsset[]
+  stack?: string[]       // Herramientas reales usadas en el proyecto
 }

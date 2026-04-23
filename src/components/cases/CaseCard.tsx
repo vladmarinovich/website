@@ -58,6 +58,25 @@ export function CaseCard({ caseStudy: c, onClick, index }: CaseCardProps) {
           {c.summary}
         </p>
 
+        {/* Tags de stack (primeros 3) */}
+        {c.stack && c.stack.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-6">
+            {c.stack.slice(0, 3).map((tool) => (
+              <span
+                key={tool}
+                className="font-mono text-[10px] text-textSecondary/40 border border-white/[0.06] px-2 py-0.5 rounded-sm tracking-wide"
+              >
+                {tool}
+              </span>
+            ))}
+            {c.stack.length > 3 && (
+              <span className="font-mono text-[10px] text-textSecondary/30 px-1 py-0.5 tracking-wide">
+                +{c.stack.length - 3}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* CTA inline */}
         <div className="flex items-center gap-2 font-mono text-xs tracking-[0.18em] text-accent-cyan uppercase group-hover:gap-3 transition-all duration-300">
           <span>Ver caso</span>

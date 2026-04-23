@@ -37,6 +37,7 @@ export const cases: CaseStudy[] = [
       { src: '/assets/cases/salvando-patitas/casos-generales.png', alt: 'Salvando Patitas — vista general del sistema', kind: 'full'   },
       { src: '/assets/cases/salvando-patitas/finanzas.png',        alt: 'Salvando Patitas — módulo de donaciones y finanzas', kind: 'detail' },
     ],
+    stack: ['Salesforce', 'Apex', 'Flow', 'Jira', 'Azure VM', 'n8n'],
   },
 
   {
@@ -70,6 +71,7 @@ export const cases: CaseStudy[] = [
       { src: '/assets/cases/casa-ronald/mockup-3.png', alt: 'Casa Ronald — recomendaciones', kind: 'detail' },
       { src: '/assets/cases/casa-ronald/mockup-4.png', alt: 'Casa Ronald — optimización de presupuesto', kind: 'detail' },
     ],
+    stack: ['BigQuery', 'Dataform', 'Google Ads', 'Google Grants', 'Meta Ads', 'n8n'],
   },
 
   {
@@ -100,5 +102,6 @@ export const cases: CaseStudy[] = [
     assets: [
       { src: '/assets/cases/orionbi/mockup.webp', alt: 'Orion BI — plataforma de inteligencia publicitaria', kind: 'full' },
     ],
+    stack: ['React', 'Tailwind', 'MongoDB', 'PostgreSQL', 'Meta Ads API', 'Google Ads API', 'TikTok API'],
   },
 ]
