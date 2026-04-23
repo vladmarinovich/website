@@ -17,7 +17,7 @@ export default function Evidence() {
   const openCase = useCaseStore((s) => s.openCase)
 
   return (
-    <section id="evidence" className="relative py-32 px-6 md:px-12">
+    <section id="evidence" className="relative min-h-screen py-32 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
 
         {/* Encabezado */}

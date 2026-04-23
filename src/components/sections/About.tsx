@@ -15,7 +15,7 @@ export default function About() {
   const c = siteCopy.about
 
   return (
-    <section id="about" className="relative py-32 px-6 md:px-12">
+    <section id="about" className="relative min-h-screen py-32 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
 
         <FadeUp>

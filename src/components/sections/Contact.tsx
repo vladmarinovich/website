@@ -82,10 +82,7 @@ export default function Contact() {
   // Se disuelve a medida que la imagen crece y toma todo el espacio
   const darkBgOpacity = useTransform(scrollYProgress, [0, 0.30], [1, 0])
 
-  // ── Pantalla blanca — aparece cuando el zoom está al máximo ──
-  const whiteOpacity = useTransform(scrollYProgress, [0.40, 0.56], [0, 1])
-
-  // ── Contenido — aparece sobre el blanco ──────────────────────
+  // ── Contenido — aparece sobre el blanco de la imagen ────────
   const contentOpacity = useTransform(scrollYProgress, [0.55, 0.72], [0, 1])
   const contentY       = useTransform(scrollYProgress, [0.55, 0.72], [32, 0])
 
@@ -109,13 +106,7 @@ export default function Contact() {
         {/* z-0 — imagen con zoom en 3 fases */}
         <FooterImage scale={bgScale} borderRadius={bgRadius} />
 
-        {/* z-10 — pantalla blanca que sella el zoom */}
-        <motion.div
-          className="absolute inset-0 z-10 pointer-events-none bg-white"
-          style={{ opacity: whiteOpacity }}
-        />
-
-        {/* z-20 — CTA sobre el blanco */}
+        {/* z-20 — CTA aparece sobre el blanco de la imagen zoomeada */}
         <motion.div
           className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 md:px-12"
           style={{ opacity: contentOpacity, y: contentY }}

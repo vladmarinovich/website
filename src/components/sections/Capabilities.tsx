@@ -17,7 +17,7 @@ export default function Capabilities() {
   const c = siteCopy.capabilities
 
   return (
-    <section id="capabilities" className="relative py-32 px-6 md:px-12">
+    <section id="capabilities" className="relative min-h-screen py-32 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
 
         <FadeUp>

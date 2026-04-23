@@ -15,7 +15,7 @@ export default function Thinking() {
   const c = siteCopy.thinking
 
   return (
-    <section id="thinking" className="relative py-32 px-6 md:px-12">
+    <section id="thinking" className="relative min-h-screen py-32 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
 
         <FadeUp>

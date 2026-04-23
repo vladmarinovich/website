@@ -12,7 +12,7 @@ export default function Standards() {
   const c = siteCopy.standards
 
   return (
-    <section id="standards" className="relative py-32 px-6 md:px-12">
+    <section id="standards" className="relative min-h-screen py-32 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
 
         <FadeUp>
