@@ -27,6 +27,7 @@ import Thinking from '@/components/sections/Thinking'
 import About from '@/components/sections/About'
 import Standards from '@/components/sections/Standards'
 import Contact from '@/components/sections/Contact'
+import { CaseOverlay } from '@/components/cases/CaseOverlay'
 import { useLenis } from '@/hooks/useLenis'
 import { useScrollProgress } from '@/hooks/useScrollProgress'
 import { useDeviceTier } from '@/hooks/useDeviceTier'
@@ -81,6 +82,9 @@ function AppInner() {
         <Standards />
         <Contact />
       </BaseLayout>
+
+      {/* z-40/50 — overlay editorial de casos (fixed, fuera del layout) */}
+      <CaseOverlay />
     </>
   )
 }
