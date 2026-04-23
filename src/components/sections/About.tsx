@@ -19,7 +19,7 @@ export default function About() {
       <div className="max-w-7xl mx-auto">
 
         <FadeUp>
-          <p className="font-mono text-xs tracking-[0.25em] text-accent-orange mb-6 uppercase">
+          <p className="font-mono text-sm tracking-[0.22em] text-accent-orange mb-6 uppercase">
             {c.eyebrow}
           </p>
         </FadeUp>
@@ -43,7 +43,7 @@ export default function About() {
           <FadeUp delay={0.22}>
             <div className="aspect-[3/4] bg-surface rounded-sm border border-white/[0.06] overflow-hidden">
               <img
-                src="/assets/images/profile.jpg"
+                src="/assets/images/foto-vlad.jpg"
                 alt="Vlad Marinovich"
                 className="w-full h-full object-cover object-top"
               />
