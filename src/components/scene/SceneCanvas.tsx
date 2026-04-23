@@ -54,8 +54,26 @@ const PATH = new THREE.CatmullRomCurve3([
   new THREE.Vector3(0,     0,     -32),
 ])
 
-// Número de anillos distribuidos a lo largo del corredor
-const RING_COUNT = 22
+// Distribución de anillos a lo largo del corredor.
+// No uniforme: clusters apretados alternan con vacíos — se lee como
+// arquitectura (pilares, vigas), no como colonia de demo CatmullRom.
+// 15 anillos en lugar de 22 — menos presencia, más peso por unidad.
+const RING_T = [
+  0.06, 0.095,                 // cluster en la entrada
+  0.20,
+  0.30, 0.335,                 // par
+  0.42,
+  0.52, 0.555, 0.60,           // tripleta media
+  0.69,
+  0.76,
+  0.83, 0.865,                 // par al fondo
+  0.93,
+  0.975,
+]
+
+// Índices de anillos con tilt sutil fuera del eje — rompe la
+// perfección concéntrica sin que se lea como error.
+const RING_TILT = new Set([2, 7, 11])
 
 // Interpolación lineal — usada para suavizar posición, colores y opacidades por frame
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
@@ -130,33 +148,38 @@ function Tunnel() {
 }
 
 /* ── Rings ───────────────────────────────────────────────── */
-// 22 anillos TorusGeometry orientados perpendicularmente a la curva.
-// La orientación se calcula con setFromUnitVectors(Z_local → tangente).
+// 15 anillos TorusGeometry orientados perpendicularmente a la curva.
+// Distribución no uniforme (ver RING_T) + tilt sutil en un subset:
+// arquitectura cinematográfica, no demo de CatmullRom.
+// Torus con 16 segmentos radiales y 96 tubulares → sin facetas.
 // Los colores hacen lerp hacia MODE_PALETTE[colorMode] en cada frame.
 // La opacidad escala con tunnelIntensity — los anillos se atenúan al bajar.
-// Cada 3er anillo tiene un segundo anillo interior más fino.
 function Rings() {
-  // Refs para actualizar color y opacidad de cada anillo en useFrame
-  const ringRefs      = useRef<(THREE.Mesh | null)[]>(Array(RING_COUNT).fill(null))
+  const ringRefs      = useRef<(THREE.Mesh | null)[]>(Array(RING_T.length).fill(null))
   const innerRingRefs = useRef<(THREE.Mesh | null)[]>([])
   const ringCol       = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
-  const ringOpacity   = useRef(0.28)   // opacidad suavizada de los anillos principales
-  const innerOpacity  = useRef(0.15)   // opacidad suavizada de los anillos interiores
+  const ringOpacity   = useRef(0.28)
+  const innerOpacity  = useRef(0.15)
 
-  // Posiciones y quaterniones precalculados — no recalcular en cada render
   const ringData = useMemo(() => {
     const zAxis = new THREE.Vector3(0, 0, 1)
-    return Array.from({ length: RING_COUNT }, (_, i) => {
-      const t       = (i + 1) / (RING_COUNT + 1) // evitar los extremos del path
+    const yAxis = new THREE.Vector3(0, 1, 0)
+    return RING_T.map((t, i) => {
       const pos     = PATH.getPoint(t)
       const tangent = PATH.getTangent(t).normalize()
 
-      // Rotar el anillo para que su normal (Z) apunte en dirección del tangente
       const quat = new THREE.Quaternion()
       quat.setFromUnitVectors(zAxis, tangent)
 
-      // Ritmo visual: cada 3 anillos uno es ligeramente más grande
-      const scale = i % 3 === 0 ? 1.08 : 0.96
+      // Tilt sutil (~7°) para romper concentricidad perfecta
+      if (RING_TILT.has(i)) {
+        const tilt = new THREE.Quaternion()
+        tilt.setFromAxisAngle(yAxis, (i % 2 === 0 ? 1 : -1) * 0.12)
+        quat.multiply(tilt)
+      }
+
+      // Ritmo de escala: distribución menos mecánica que i%3
+      const scale = i === 2 || i === 6 || i === 9 || i === 13 ? 1.08 : 0.94
       return { pos, quat, scale }
     })
   }, [])
@@ -192,15 +215,17 @@ function Rings() {
     })
   })
 
-  // Precalcular subset de anillos interiores (cada 3er índice)
+  // Subset editorial para anillos interiores — solo 4, no cada 3er índice.
+  // Menos presencia, más peso por aparición.
+  const INNER_INDICES = [3, 6, 9, 12]
   const innerRingData = useMemo(
-    () => ringData.filter((_, i) => i % 3 === 0),
+    () => INNER_INDICES.map((i) => ringData[i]).filter(Boolean),
     [ringData]
   )
 
   return (
     <>
-      {/* Anillos principales */}
+      {/* Anillos principales — torus 16×96 para eliminar facetas */}
       {ringData.map(({ pos, quat, scale }, i) => (
         <mesh
           key={i}
@@ -209,8 +234,8 @@ function Rings() {
           quaternion={quat}
           scale={scale}
         >
-          {/* args: [radio, grosor del tubo, segmentos radiales, segmentos circulares] */}
-          <torusGeometry args={[1.72, 0.007, 8, 80]} />
+          {/* args: [radio, grosor, segmentos radiales, segmentos circulares] */}
+          <torusGeometry args={[1.72, 0.008, 16, 96]} />
           <meshBasicMaterial
             color={MODE_PALETTE.cyan.ring}
             transparent
@@ -219,7 +244,7 @@ function Rings() {
         </mesh>
       ))}
 
-      {/* Anillos interiores secundarios — cada 3er anillo, más finos y tenues */}
+      {/* Anillos interiores — solo 4, más finos y tenues */}
       {innerRingData.map(({ pos, quat }, i) => (
         <mesh
           key={`interior-${i}`}
@@ -227,11 +252,11 @@ function Rings() {
           position={pos}
           quaternion={quat}
         >
-          <torusGeometry args={[1.55, 0.004, 6, 80]} />
+          <torusGeometry args={[1.54, 0.004, 12, 96]} />
           <meshBasicMaterial
             color={MODE_PALETTE.cyan.ring}
             transparent
-            opacity={0.15}
+            opacity={0.14}
           />
         </mesh>
       ))}
@@ -239,26 +264,51 @@ function Rings() {
   )
 }
 
-/* ── DustParticles ───────────────────────────────────────── */
-// 600 puntos distribuidos aleatoriamente a lo largo del corredor.
-// Derivan lentamente en Y con seno para simular polvo en suspensión.
-// El color y la opacidad siguen al colorMode y tunnelIntensity.
-function DustParticles() {
-  const ref           = useRef<THREE.Points>(null)
-  const count         = 600
-  const col           = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
-  const dustOpacity   = useRef(0.45)  // opacidad suavizada de las partículas
+/* ── ParticleLayer ───────────────────────────────────────── */
+// Capa de partículas parametrizada — se instancia dos veces para
+// crear paralaje (una capa cerca/grande/lenta, otra lejos/fina/rápida).
+//
+// AdditiveBlending: las partículas se suman a la luz del fondo —
+// respiran con el bloom y tienen glow natural, sin alpha plano.
+//
+// spreadXY:   dispersión lateral (mayor en background para llenar)
+// zRange:     [near, far] en coordenadas del mundo (negativo = adelante)
+// driftSpeed: factor de oscilación vertical
+// opacityBase: opacidad en reposo (escala con tunnelIntensity)
+function ParticleLayer({
+  count,
+  size,
+  spreadXY,
+  zRange,
+  driftSpeed,
+  opacityBase,
+  phaseOffset = 0,
+}: {
+  count: number
+  size: number
+  spreadXY: [number, number]
+  zRange: [number, number]
+  driftSpeed: number
+  opacityBase: number
+  phaseOffset?: number
+}) {
+  const ref  = useRef<THREE.Points>(null)
+  const col  = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
+  const opa  = useRef(opacityBase)
 
-  // Posiciones iniciales aleatorias — no recalcular después
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3)
+    const [zNear, zFar] = zRange
     for (let i = 0; i < count; i++) {
-      arr[i * 3]     = (Math.random() - 0.5) * 3.2  // spread horizontal
-      arr[i * 3 + 1] = (Math.random() - 0.5) * 2.4  // spread vertical
-      arr[i * 3 + 2] = -Math.random() * 30           // profundidad del corredor
+      arr[i * 3]     = (Math.random() - 0.5) * spreadXY[0]
+      arr[i * 3 + 1] = (Math.random() - 0.5) * spreadXY[1]
+      // Distribución con sesgo hacia cámara — más densidad cerca,
+      // menos al fondo. Da sensación de profundidad atmosférica.
+      const bias = Math.pow(Math.random(), 1.35)
+      arr[i * 3 + 2] = zNear + (zFar - zNear) * bias
     }
     return arr
-  }, [])
+  }, [count, spreadXY, zRange])
 
   useFrame((state) => {
     if (!ref.current) return
@@ -266,22 +316,20 @@ function DustParticles() {
     const { colorMode, tunnelIntensity } = useSceneStore.getState()
     const target = MODE_PALETTE[colorMode] ?? MODE_PALETTE.cyan
 
-    // Actualizar color con lerp
     col.current.lerp(new THREE.Color(target.ring), 0.04)
 
-    // Atenuar partículas con tunnelIntensity — mínimo 0.05 para mantener presencia
-    const targetDustOpacity = Math.max(0.05, 0.45 * tunnelIntensity)
-    dustOpacity.current = lerp(dustOpacity.current, targetDustOpacity, 0.03)
+    const targetOpacity = Math.max(0.03, opacityBase * tunnelIntensity)
+    opa.current = lerp(opa.current, targetOpacity, 0.03)
 
     const mat = ref.current.material as THREE.PointsMaterial
     mat.color.copy(col.current)
-    mat.opacity = dustOpacity.current
+    mat.opacity = opa.current
 
-    // Deriva suave en Y — diferente fase por partícula (índice i)
+    // Deriva vertical — fase propia de cada partícula
     const arr = ref.current.geometry.attributes.position.array as Float32Array
-    const t   = state.clock.elapsedTime * 0.03
+    const t   = state.clock.elapsedTime * driftSpeed + phaseOffset
     for (let i = 0; i < count; i++) {
-      arr[i * 3 + 1] += Math.sin(t + i * 0.7) * 0.0004
+      arr[i * 3 + 1] += Math.sin(t + i * 0.73) * 0.0004
     }
     ref.current.geometry.attributes.position.needsUpdate = true
   })
@@ -292,12 +340,13 @@ function DustParticles() {
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.012}
+        size={size}
         color={MODE_PALETTE.cyan.ring}
         transparent
-        opacity={0.45}
-        sizeAttenuation  // partículas más lejanas se ven más pequeñas
+        opacity={opacityBase}
+        sizeAttenuation
         depthWrite={false}
+        blending={THREE.AdditiveBlending}
       />
     </points>
   )
@@ -374,7 +423,28 @@ function SceneContent() {
       <CameraRig />
       <Tunnel />
       <Rings />
-      <DustParticles />
+
+      {/* Capa cercana — partículas grandes, lentas, cerca de cámara */}
+      <ParticleLayer
+        count={140}
+        size={0.020}
+        spreadXY={[3.4, 2.6]}
+        zRange={[0, -14]}
+        driftSpeed={0.025}
+        opacityBase={0.30}
+      />
+
+      {/* Capa profunda — partículas finas, rápidas, al fondo del corredor */}
+      <ParticleLayer
+        count={360}
+        size={0.006}
+        spreadXY={[3.2, 2.4]}
+        zRange={[-8, -30]}
+        driftSpeed={0.045}
+        opacityBase={0.55}
+        phaseOffset={1.3}
+      />
+
       <Effects />
     </>
   )
