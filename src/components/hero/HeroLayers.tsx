@@ -53,11 +53,11 @@ function HeroBackground({ scale }: { scale: MotionValue<number> }) {
       <picture>
         <source
           media="(min-width: 768px)"
-          srcSet="/assets/generated/hero/hero-desktop.webp"
+          srcSet="/assets/images/hero-desktop.webp"
           type="image/webp"
         />
         <img
-          src="/assets/generated/hero/hero-mobile.webp"
+          src="/assets/images/hero-mobile.webp"
           alt=""
           aria-hidden="true"
           draggable={false}
