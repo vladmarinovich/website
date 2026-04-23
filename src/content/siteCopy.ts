@@ -9,6 +9,7 @@
 export const siteCopy = {
   nav: {
     brand: 'Vlad Marinovich',
+    wordmark: 'VLADISLAV MARINOVICH',
     links: [
       { id: 'evidence',     label: 'Trabajo'   },
       { id: 'thinking',     label: 'Criterio'  },
@@ -19,32 +20,25 @@ export const siteCopy = {
   },
 
   hero: {
-    eyebrow:     'DISPONIBLE · Q2 2026',
-    title:       'Convierto ideas en sistemas que funcionan solos.',
-    subtitle:    'Ingeniería, estrategia y ejecución en una sola mente operativa. Diseño infraestructura digital, producto y decisiones con criterio de sistema.',
-    supporting:  'No vendo servicios. Diseño claridad, estructura y tracción.',
+    eyebrow:    'INFRAESTRUCTURA QUE PIENSA.',
+    // El subtitle actúa como H1 visual — la tesis vive ahí.
+    subtitle:   'La mayoría de las organizaciones ya tiene la tecnología. El problema no es lo que falta — es lo que no está conectado.',
+    supporting: 'En 120 días, eso se convierte en un sistema que opera solo.',
     ctaPrimary:  'Agendar una llamada',
     ctaSecondary:'Ver evidencia',
     scrollHint:  'Entrar al sistema',
-    // Métricas de impacto en la franja inferior del hero
-    metrics: [
-      { value: 'Sistemas reales',    label: 'en producción'         },
-      { value: 'Diagnóstico',        label: 'que se vuelve decisión'},
-      { value: 'Producto, data',     label: 'y operación'           },
-      { value: '+4.200 patitas',     label: 'con casa nueva'        },
-    ],
   },
 
   evidence: {
     eyebrow: 'EVIDENCIA',
-    title:   'Construido antes de vendido.',
-    body:    'No promesas. No posicionamiento vacío. Sistemas reales, interfaces reales y lectura estratégica aplicada a problemas reales.',
+    title:   'No prometo. Muestro.',
+    body:    'Sistemas reales, interfaces reales, criterio aplicado a problemas reales.',
   },
 
   capabilities: {
     eyebrow: 'CAPACIDADES',
-    title:   'No servicios. Capas de intervención.',
-    body:    'Cada compromiso empieza igual: primero entiendo el sistema. Después decido qué conviene construir, qué conviene conectar y qué conviene eliminar.',
+    title:   'Veo lo que no está funcionando. Y sé exactamente por dónde entrar.',
+    body:    'Primero entiendo el sistema. Después decido qué construir, qué conectar y qué eliminar.',
     items: [
       {
         title: 'Arquitectura digital',
@@ -60,15 +54,15 @@ export const siteCopy = {
       },
       {
         title: 'Experiencia y posicionamiento',
-        body:  'Cuando hace falta, convierto complejidad en una experiencia clara, deseable y estratégicamente legible.',
+        body:  'Convierto complejidad en una experiencia clara, deseable y estratégicamente legible.',
       },
     ],
   },
 
   thinking: {
     eyebrow: 'CRITERIO',
-    title:   'La diferencia no es hacer más. Es ver mejor.',
-    body:    'La mayoría ejecuta demasiado pronto. Yo prefiero detectar primero qué tiene sentido construir, qué puede escalar y qué solo va a producir ruido.',
+    title:   'La diferencia no es lo que hago. Es lo que veo antes de hacerlo.',
+    body:    'La mayoría ejecuta demasiado pronto. Yo prefiero detectar qué tiene sentido construir — y qué solo va a producir ruido.',
     principles: [
       {
         title: 'El sistema antes que la herramienta',
@@ -80,7 +74,7 @@ export const siteCopy = {
       },
       {
         title: 'La evidencia antes que el discurso',
-        body:  'No me interesa sonar capaz. Me interesa que el trabajo vuelva eso obvio.',
+        body:  'No me interesa sonar capaz. Me interesa que el trabajo lo haga obvio.',
       },
       {
         title: 'Construir antes de vender',
@@ -91,16 +85,16 @@ export const siteCopy = {
 
   about: {
     eyebrow:       'SOBRE MÍ',
-    title:         'Humano por fuera. Sistémico por dentro.',
-    bodyPrimary:   'Pienso como partner, no como proveedor. Entro para entender el mapa completo, detectar lo que importa y construir la estructura correcta para moverlo.',
-    bodySecondary: 'Construyo antes de vender. Salvando Patitas no es un discurso sobre impacto. Es la prueba de que cuando algo importa de verdad, también se puede diseñar con rigor.',
+    title:         'Pienso como socio. Opero como fundador.',
+    bodyPrimary:   'No entro a ejecutar tareas. Entro a entender el mapa completo, detectar lo que importa y construir la estructura correcta para moverlo.',
+    bodySecondary: 'Salvando Patitas no es un discurso sobre impacto. Es la prueba de que cuando algo importa de verdad, también se puede diseñar con rigor.',
     quote:         'Sé exactamente lo que hago. Y lo que hago define el estándar.',
   },
 
   standards: {
     eyebrow:  'ESTÁNDARES',
-    title:    'Esto funciona mejor con ambición real.',
-    body:     'Trabajo mejor con founders, líderes, empresas y fundaciones que no están buscando alguien que ejecute, sino alguien que entienda el sistema, tome criterio y lo convierta en estructura.',
+    title:    'Trabajo mejor cuando el problema es real.',
+    body:     'Con founders, líderes y equipos que no buscan manos — buscan criterio, estructura y velocidad con sentido.',
     yesTitle: 'Con quién sí',
     yesItems: [
       'Equipos con complejidad real',
@@ -118,16 +112,16 @@ export const siteCopy = {
   },
 
   contact: {
-    eyebrow:    'CONTACTO',
-    title:      'Si llegaste hasta aquí, probablemente ya entendiste el nivel.',
-    body:       'No necesitas un pitch. Solo una conversación honesta sobre lo que quieres resolver y si soy la persona correcta para construirlo contigo.',
+    eyebrow:     'CONTACTO',
+    title:       'Si llegaste hasta aquí, ya sé que eres el tipo correcto.',
+    body:        'Una conversación. Cero fricción.',
     ctaPrimary:  'Agendar una llamada',
     ctaSecondary:'Escribir directo',
-    microcopy:  'Cero formularios largos. Cero fricción. Solo una conversación útil.',
+    microcopy:   'Respondo el mismo día.',
   },
 
   footer: {
     brand: 'VLADMARINOVICH.COM',
-    note:  'Hecho con disciplina, criterio y sistemas que sí viven en producción.',
+    note:  'Diseñado, construido y operado por una sola mente.',
   },
 }
