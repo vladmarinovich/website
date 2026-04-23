@@ -1,9 +1,8 @@
 /**
  * Casos de estudio mostrados en la sección Evidence.
  *
- * Cada CaseStudy incluye el problema, la intervención, el resultado
- * y métricas de impacto concretas. El panel expandido los muestra
- * en su totalidad cuando el usuario abre un caso.
+ * Toda la información es real y verificable.
+ * Los assets apuntan a /public/assets/cases/
  */
 
 import type { CaseStudy } from '@/types/case'
@@ -14,33 +13,29 @@ export const cases: CaseStudy[] = [
     slug:     'salvando-patitas',
     eyebrow:  'CASO 01',
     title:    'Salvando Patitas',
-    category: 'Producto · Operaciones · Impacto',
-    summary:  'Plataforma digital de adopción de mascotas construida desde cero para una fundación colombiana. Diseño, desarrollo, infraestructura y operación.',
+    category: 'Salesforce · Operaciones · Impacto social',
+    summary:  'Sistema operativo completo para una fundación de rescate animal. Cuatro módulos que reemplazaron hojas de cálculo, WhatsApp y papel por trazabilidad real en tiempo real.',
 
-    // El problema real que enfrentaba la organización
     challenge:
-      'Una fundación con misión real pero sin estructura digital. Operaban con formularios en papel, WhatsApp y hojas de cálculo. El proceso de adopción era lento, opaco y no escalable.',
+      'La fundación operaba sin memoria institucional. Los datos vivían dispersos entre mensajes, hojas sueltas y la cabeza de cada voluntario. No había forma de saber el estado financiero real, la trazabilidad de cada caso ni el historial de un animal. Las decisiones operativas se tomaban en la marcha, sin información.',
 
-    // Qué se construyó y cómo
     intervention:
-      'Diseñé y construí la plataforma completa: sistema de gestión de animales, flujo de adopción digital, automatizaciones con n8n, integración con Brevo y Google Sheets, y panel de administración para el equipo.',
+      'Diseñé y construí un sistema operativo con cuatro módulos integrados: Rescate (gestión de casos activos), Veterinaria (historial clínico y tratamientos), Hogar de paso (disponibilidad y seguimiento) y Donaciones (gastos, pagos e ingresos). Todo conectado, todo trazable, todo en tiempo real.',
 
-    // Resultado medible
     result:
-      'Más de 4.200 animales con casa nueva. Tiempo de respuesta de adopción reducido de días a horas. Equipo operando con claridad sin depender de procesos manuales.',
+      'Evidencia trazada por cada caso. Estado financiero visible en minutos, no en semanas. El equipo opera con información real en lugar de intuición. Control total de la operación y transparencia total con donantes y aliados.',
 
-    // Por qué este caso importa estratégicamente
     strategicRead:
-      'No fue un proyecto de voluntariado. Fue la demostración de que puedo diseñar sistemas reales con impacto medible desde cero, bajo restricciones reales.',
+      'Este no es un proyecto de impacto social disfrazado de tecnología. Es la demostración de que puedo tomar una operación caótica, entender sus dependencias reales y construir la infraestructura que la hace funcionar sola — con o sin voluntarios disponibles.',
 
     metrics: [
-      { label: 'Animales adoptados',           value: '+4.200'  },
-      { label: 'Reducción en tiempo respuesta', value: '~80%'   },
-      { label: 'Automatizaciones activas',      value: '12+'    },
+      { label: 'Casos gestionados',   value: '39'           },
+      { label: 'Adopciones exitosas', value: '50+'          },
+      { label: 'Módulos activos',     value: '4'            },
     ],
     assets: [
-      { src: '/assets/cases/salvando-patitas/casos-generales.png', alt: 'Salvando Patitas — casos generales', kind: 'full' },
-      { src: '/assets/cases/salvando-patitas/finanzas.png',        alt: 'Salvando Patitas — módulo de finanzas', kind: 'detail' },
+      { src: '/assets/cases/salvando-patitas/casos-generales.png', alt: 'Salvando Patitas — vista general del sistema', kind: 'full'   },
+      { src: '/assets/cases/salvando-patitas/finanzas.png',        alt: 'Salvando Patitas — módulo de donaciones y finanzas', kind: 'detail' },
     ],
   },
 
@@ -48,32 +43,32 @@ export const cases: CaseStudy[] = [
     id:       'casa-ronald-bigquery',
     slug:     'casa-ronald-bigquery',
     eyebrow:  'CASO 02',
-    title:    'Casa Ronald Colombia — Data Warehouse',
-    category: 'Data · Arquitectura · Estrategia',
-    summary:  'Diseño e implementación de un data warehouse en Google BigQuery para centralizar la información operativa de Casa Ronald Colombia.',
+    title:    'Casa Ronald Colombia',
+    category: 'BigQuery · Google Ads · IA',
+    summary:  'Data warehouse con arquitectura medallón que centraliza campañas de múltiples cuentas Google Ads, detecta fugas de presupuesto y conecta un agente de IA para diagnóstico y optimización en tiempo real.',
 
     challenge:
-      'Una organización sin fines de lucro con datos dispersos en múltiples fuentes: donaciones, estadísticas de impacto, operación de casas. Sin visibilidad centralizada, sin capacidad de tomar decisiones basadas en datos.',
+      'Múltiples cuentas de Google Ads sin visión centralizada. Errores de registro de conversiones que distorsionaban las decisiones. Presupuesto subvencionado (Google Grants) subutilizado. Campañas activas que no rendían y nadie lo sabía. Dinero quemado sin diagnóstico.',
 
     intervention:
-      'Diseñé la arquitectura del DW en GCP BigQuery (dataset casa_ronald_dw). Definí el modelo de datos, los pipelines de ingesta y la estructura para migración futura a Azure. Construido con criterio de escalabilidad desde el inicio.',
+      'Diseñé un data warehouse en Google BigQuery con arquitectura medallón (Bronze → Silver → Gold) para centralizar, enriquecer y estructurar la data de todas las cuentas. Sobre esa base se conecta un agente de IA capaz de diagnosticar errores, detectar fugas y asesorar sobre estrategia de inversión publicitaria.',
 
     result:
-      'Organización con capacidad de centralizar y leer su propia operación. Base técnica sólida para reportes de impacto, transparencia con donantes y toma de decisiones estratégicas.',
+      'Toda la información de campañas centralizada y limpia en un solo lugar. Errores de tracking identificados. Oportunidades de optimización del presupuesto Google Grants documentadas y priorizadas. Base lista para BI, ML e IA.',
 
     strategicRead:
-      'Los datos sin estructura son ruido. Este proyecto convirtió la operación dispersa de una fundación en inteligencia accionable.',
+      'El problema no era falta de datos — era falta de estructura para leerlos. Un data warehouse bien diseñado no es un repositorio: es el sistema nervioso desde el que se pueden tomar decisiones de inversión con criterio real.',
 
     metrics: [
-      { label: 'Fuentes integradas', value: '6+'            },
-      { label: 'Dataset principal',  value: 'casa_ronald_dw'},
-      { label: 'Plataforma',         value: 'GCP BigQuery'  },
+      { label: 'Arquitectura',          value: 'Medallón'     },
+      { label: 'Fuente principal',       value: 'Google Ads + Grants' },
+      { label: 'Capa de inteligencia',   value: 'Agente IA'   },
     ],
     assets: [
-      { src: '/assets/cases/casa-ronald/mockup-1.png', alt: 'Casa Ronald — respuesta automática 1', kind: 'full'   },
-      { src: '/assets/cases/casa-ronald/mockup-2.png', alt: 'Casa Ronald — respuesta automática 2', kind: 'crop'   },
-      { src: '/assets/cases/casa-ronald/mockup-3.png', alt: 'Casa Ronald — respuesta automática 3', kind: 'detail' },
-      { src: '/assets/cases/casa-ronald/mockup-4.png', alt: 'Casa Ronald — respuesta automática 4', kind: 'detail' },
+      { src: '/assets/cases/casa-ronald/mockup-1.png', alt: 'Casa Ronald — análisis de campañas', kind: 'full'   },
+      { src: '/assets/cases/casa-ronald/mockup-2.png', alt: 'Casa Ronald — diagnóstico de errores', kind: 'crop'   },
+      { src: '/assets/cases/casa-ronald/mockup-3.png', alt: 'Casa Ronald — recomendaciones', kind: 'detail' },
+      { src: '/assets/cases/casa-ronald/mockup-4.png', alt: 'Casa Ronald — optimización de presupuesto', kind: 'detail' },
     ],
   },
 
@@ -82,28 +77,28 @@ export const cases: CaseStudy[] = [
     slug:     'orion-bi',
     eyebrow:  'CASO 03',
     title:    'Orion BI',
-    category: 'Producto · Data · Visualización',
-    summary:  'Plataforma de business intelligence diseñada para equipos que necesitan leer su operación sin depender de analistas o dashboards decorativos.',
+    category: 'Producto · IA · Performance Marketing',
+    summary:  'Plataforma de inteligencia publicitaria que unifica Meta Ads, Google Ads, TikTok y GA4 en un solo panel. Modelos predictivos de ROAS y un asistente de IA que analiza campañas en lenguaje natural.',
 
     challenge:
-      'Equipos con datos pero sin lectura. Dashboards que nadie usa porque no responden preguntas reales. Decisiones tomadas por intuición cuando el dato existía pero no era accesible.',
+      'Agencias, e-commerce y consultores navegando entre cuatro plataformas distintas para entender qué está pasando. Reportes manuales que consumen tiempo. Dashboards que describen el pasado pero no orientan la siguiente jugada. Decisiones basadas en intuición cuando el dato existía pero era inaccesible.',
 
     intervention:
-      'Diseñé la arquitectura de producto y la experiencia de Orion BI: una plataforma que convierte señales operativas en lectura útil para quien decide, no para quien analiza.',
+      'Diseñé la arquitectura de producto y la experiencia completa de Orion BI: unificación multicanal (Meta Ads, Google Ads, TikTok, GA4), modelos de machine learning para predecir ROAS y CPA, alertas inteligentes que detectan anomalías automáticamente y un asistente de IA que responde preguntas sobre campañas en lenguaje natural.',
 
     result:
-      'Producto con visión clara, arquitectura definida y experiencia diseñada para el usuario que toma decisiones, no para el técnico que construye reportes.',
+      'Un producto con visión clara, arquitectura definida y experiencia diseñada para quien decide — no para quien analiza. MVP en desarrollo activo, con integraciones piloto en progreso hacia versión beta.',
 
     strategicRead:
-      'La mayoría de los BI tools están diseñados para analistas. Orion está diseñado para quien necesita decidir. Esa diferencia lo cambia todo.',
+      'La mayoría de los BI tools están diseñados para analistas. Orion está diseñado para quien necesita decidir. Esa diferencia lo cambia todo — desde la arquitectura de datos hasta la interfaz.',
 
     metrics: [
-      { label: 'Enfoque',           value: 'Decisión > Análisis'  },
-      { label: 'Usuarios objetivo', value: 'Founders & Líderes'   },
-      { label: 'Estado',            value: 'Producto en desarrollo'},
+      { label: 'Canales unificados',  value: '4'              },
+      { label: 'Estado',             value: 'MVP en desarrollo' },
+      { label: 'Enfoque',            value: 'Decisión > Análisis' },
     ],
     assets: [
-      { src: '/assets/cases/orionbi/mockup.webp', alt: 'Orion BI — plataforma', kind: 'full' },
+      { src: '/assets/cases/orionbi/mockup.webp', alt: 'Orion BI — plataforma de inteligencia publicitaria', kind: 'full' },
     ],
   },
 ]
