@@ -174,6 +174,9 @@ export default function Contact() {
           <span className="mt-3 font-mono text-[10px] tracking-[0.32em] text-black/45 uppercase">
             Vladislav Marinovich · 2026
           </span>
+          <p className="mt-8 font-mono text-[11px] tracking-[0.14em] text-black/35 whitespace-pre-wrap text-center">
+            {c.colophon}
+          </p>
         </motion.div>
 
       </div>
