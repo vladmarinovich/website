@@ -21,7 +21,7 @@ export default function Capabilities() {
       <div className="max-w-7xl mx-auto">
 
         <FadeUp>
-          <p className="font-mono text-xs tracking-[0.25em] text-accent-purple mb-6 uppercase">
+          <p className="font-mono text-sm tracking-[0.22em] text-accent-purple mb-6 uppercase">
             {c.eyebrow}
           </p>
 
@@ -40,7 +40,7 @@ export default function Capabilities() {
             <FadeUp key={i} delay={i * 0.08} className="bg-background">
               <div className="p-8">
                 <h3 className="text-textPrimary font-semibold text-lg mb-3">{item.title}</h3>
-                <p className="text-textSecondary text-base leading-relaxed">{item.body}</p>
+                <p className="text-textSecondary text-lg leading-relaxed">{item.body}</p>
               </div>
             </FadeUp>
           ))}
