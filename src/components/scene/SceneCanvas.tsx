@@ -559,9 +559,10 @@ function SceneContent() {
 // dpr [1, 1.5] limita la resolución en pantallas de alta densidad
 // para mantener rendimiento en dispositivos de gama media.
 export default function SceneCanvas() {
-  const tier = useUIStore((s) => s.deviceTier)
+  const tier         = useUIStore((s) => s.deviceTier)
+  const setSceneReady = useUIStore((s) => s.setSceneReady)
 
-  const dpr      = tier === 'low'    ? [1, 1]   : tier === 'medium' ? [1, 1.2] : [1, 1.5]
+  const dpr       = tier === 'low' ? [1, 1] : tier === 'medium' ? [1, 1.2] : [1, 1.5]
   const antialias = tier !== 'low'
 
   return (
@@ -575,6 +576,7 @@ export default function SceneCanvas() {
         gl={{ antialias, alpha: false }}
         dpr={dpr as [number, number]}
         style={{ background: '#05070B' }}
+        onCreated={() => setSceneReady(true)}
       >
         <Suspense fallback={null}>
           <SceneContent />
