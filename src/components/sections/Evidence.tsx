@@ -33,14 +33,18 @@ export default function Evidence() {
       <div className="max-w-7xl mx-auto">
 
         {/* Encabezado */}
-        <FadeUp>
-          <p className="font-mono text-sm tracking-[0.22em] text-accent-cyan mb-6 uppercase">
+        <FadeUp kind="eyebrow">
+          <p className="font-mono text-xs md:text-sm tracking-[0.28em] text-accent-cyan mb-6 uppercase">
             {c.eyebrow}
           </p>
-          <h2 className="text-4xl md:text-6xl font-bold text-textPrimary leading-none tracking-tight mb-6">
+        </FadeUp>
+        <FadeUp kind="title" delay={0.08}>
+          <h2 className="text-4xl md:text-6xl font-semibold text-textPrimary leading-[1.02] tracking-[-0.02em] mb-6">
             {c.title}
           </h2>
-          <p className="text-textSecondary text-xl max-w-2xl leading-relaxed">
+        </FadeUp>
+        <FadeUp kind="body" delay={0.22}>
+          <p className="text-textSecondary text-lg md:text-xl max-w-2xl leading-[1.6]">
             {c.body}
           </p>
         </FadeUp>

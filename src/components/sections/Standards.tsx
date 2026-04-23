@@ -20,16 +20,18 @@ export default function Standards() {
     <motion.section id="standards" ref={ref} className="relative min-h-screen py-32 px-6 md:px-12" style={{ opacity }}>
       <div className="max-w-7xl mx-auto">
 
-        <FadeUp>
-          <p className="font-mono text-sm tracking-[0.22em] text-textSecondary mb-6 uppercase">
+        <FadeUp kind="eyebrow">
+          <p className="font-mono text-xs md:text-sm tracking-[0.28em] text-textSecondary mb-6 uppercase">
             {c.eyebrow}
           </p>
-
-          <h2 className="text-4xl md:text-6xl font-bold text-textPrimary leading-none tracking-tight mb-6">
+        </FadeUp>
+        <FadeUp kind="title" delay={0.08}>
+          <h2 className="text-4xl md:text-6xl font-semibold text-textPrimary leading-[1.02] tracking-[-0.02em] mb-6 max-w-4xl">
             {c.title}
           </h2>
-
-          <p className="text-textSecondary text-xl max-w-2xl leading-relaxed mb-16">
+        </FadeUp>
+        <FadeUp kind="body" delay={0.22}>
+          <p className="text-textSecondary text-lg md:text-xl max-w-2xl leading-[1.6] mb-16">
             {c.body}
           </p>
         </FadeUp>
