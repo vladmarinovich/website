@@ -82,7 +82,7 @@ const RING_T = [
 // Tilt sutil (~8°) en varios anillos — rompe concentricidad perfecta
 // cuando la cámara los mira de frente. Más del 40% con tilt para
 // garantizar que nunca se vea un "radar" limpio.
-const RING_TILT = new Set([1, 3, 5, 7, 9, 11])
+const RING_TILT = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
 
 // Interpolación lineal — usada para suavizar posición, colores y opacidades por frame
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
@@ -180,15 +180,15 @@ function Rings() {
       const quat = new THREE.Quaternion()
       quat.setFromUnitVectors(zAxis, tangent)
 
-      // Tilt ~8° en el eje Y, alternando dirección — rompe la lectura
-      // concéntrica perfecta cuando la cámara mira los anillos de frente.
-      // También un jitter pequeño en eje X para el mismo propósito.
+      // Tilts fuertes (~16° Y + ~10° X, alternando) para que los
+      // anillos se lean como elipses cuando la cámara los mira de
+      // frente, nunca como círculos perfectos concéntricos.
       if (RING_TILT.has(i)) {
         const tilt = new THREE.Quaternion()
-        tilt.setFromAxisAngle(yAxis, (i % 2 === 0 ? 1 : -1) * 0.14)
+        tilt.setFromAxisAngle(yAxis, (i % 2 === 0 ? 1 : -1) * 0.28)
         quat.multiply(tilt)
         const xTilt = new THREE.Quaternion()
-        xTilt.setFromAxisAngle(new THREE.Vector3(1, 0, 0), (i % 3 === 0 ? 1 : -1) * 0.08)
+        xTilt.setFromAxisAngle(new THREE.Vector3(1, 0, 0), (i % 3 === 0 ? 1 : -1) * 0.18)
         quat.multiply(xTilt)
       }
 
@@ -207,11 +207,15 @@ function Rings() {
     // Interpolación de color — factor 0.045 ≈ 22 frames de transición
     ringCol.current.lerp(new THREE.Color(target.ring), 0.045)
 
-    // Opacidad proporcional a tunnelIntensity — base reducida para
-    // que los anillos nunca se lean como radar/bullseye en los gaps
-    // entre secciones.
-    const targetMainOpacity  = Math.max(0.02, 0.16 * tunnelIntensity)
-    const targetInnerOpacity = Math.max(0.01, 0.08 * tunnelIntensity)
+    // Umbral duro: bajo tunnelIntensity 0.4 los anillos son 0.
+    // Por encima escalan linealmente hasta su pico en hero (1.0).
+    // Esto garantiza que en las secciones medias no se vea ninguna
+    // figura concéntrica — cumple el brief ("tenue en parte media").
+    const threshold = 0.40
+    const span      = 1.0 - threshold
+    const ringFactor = Math.max(0, (tunnelIntensity - threshold) / span)
+    const targetMainOpacity  = ringFactor * 0.22
+    const targetInnerOpacity = ringFactor * 0.10
     ringOpacity.current  = lerp(ringOpacity.current,  targetMainOpacity,  0.03)
     innerOpacity.current = lerp(innerOpacity.current, targetInnerOpacity, 0.03)
 
@@ -313,6 +317,25 @@ function ParticleLayer({
   const col  = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
   const opa  = useRef(opacityBase)
 
+  // Textura circular suave — sin esto pointsMaterial renderiza
+  // cuadrados (aristas visibles a tamaños > ~2px). Con esta textura
+  // los puntos leen como dots suaves con glow natural.
+  const dotTexture = useMemo(() => {
+    const c   = document.createElement('canvas')
+    c.width   = 64
+    c.height  = 64
+    const ctx = c.getContext('2d')!
+    const g   = ctx.createRadialGradient(32, 32, 0, 32, 32, 32)
+    g.addColorStop(0,    'rgba(255,255,255,1)')
+    g.addColorStop(0.35, 'rgba(255,255,255,0.45)')
+    g.addColorStop(1,    'rgba(255,255,255,0)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, 64, 64)
+    const tex = new THREE.CanvasTexture(c)
+    tex.needsUpdate = true
+    return tex
+  }, [])
+
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3)
     const [zNear, zFar] = zRange
@@ -359,6 +382,8 @@ function ParticleLayer({
       <pointsMaterial
         size={size}
         color={MODE_PALETTE.cyan.ring}
+        map={dotTexture}
+        alphaTest={0.01}
         transparent
         opacity={opacityBase}
         sizeAttenuation
@@ -441,24 +466,26 @@ function SceneContent() {
       <Tunnel />
       <Rings />
 
-      {/* Capa cercana — partículas grandes, lentas, cerca de cámara */}
+      {/* Capa cercana — partículas pequeñas (sub-pixel cerca de cámara
+          para evitar que se lean como cuadraditos de pointsMaterial).
+          Menos cantidad, más sutiles. */}
       <ParticleLayer
-        count={140}
-        size={0.020}
+        count={90}
+        size={0.008}
         spreadXY={[3.4, 2.6]}
         zRange={[0, -14]}
         driftSpeed={0.025}
-        opacityBase={0.30}
+        opacityBase={0.22}
       />
 
-      {/* Capa profunda — partículas finas, rápidas, al fondo del corredor */}
+      {/* Capa profunda — partículas finísimas, rápidas, al fondo */}
       <ParticleLayer
-        count={360}
-        size={0.006}
+        count={320}
+        size={0.0035}
         spreadXY={[3.2, 2.4]}
         zRange={[-8, -30]}
         driftSpeed={0.045}
-        opacityBase={0.55}
+        opacityBase={0.45}
         phaseOffset={1.3}
       />
 
