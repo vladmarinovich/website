@@ -21,3 +21,19 @@ body::before {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #05070B; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+/* Editorial polish — drop cap inicial */
+.drop-cap::first-letter {
+  float: left;
+  font-size: 3.5em;
+  font-weight: 600;
+  line-height: 0.85;
+  padding-right: 0.08em;
+  padding-top: 0.04em;
+}
+
+/* Tabular numerals — alineación vertical en métricas */
+.tabular-nums {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
