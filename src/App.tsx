@@ -19,6 +19,7 @@
 
 import { lazy, Suspense } from 'react'
 import BaseLayout from '@/components/layout/BaseLayout'
+import { SceneErrorBoundary } from '@/components/scene/SceneErrorBoundary'
 const SceneCanvas = lazy(() => import('@/components/scene/SceneCanvas'))
 import HeroLayers from '@/components/hero/HeroLayers'
 import Hero from '@/components/sections/Hero'
@@ -64,10 +65,12 @@ function AppInner() {
 
   return (
     <>
-      {/* z-0 — tunnel 3D de fondo (lazy: Three.js ~420KB no bloquea el parse inicial) */}
-      <Suspense fallback={null}>
-        <SceneCanvas />
-      </Suspense>
+      {/* z-0 — tunnel 3D de fondo (lazy + error boundary: si WebGL falla, fondo sólido) */}
+      <SceneErrorBoundary>
+        <Suspense fallback={null}>
+          <SceneCanvas />
+        </Suspense>
+      </SceneErrorBoundary>
 
       {/* z-1 — fondo del hero, fixed, se disuelve con scroll */}
       <HeroLayers />
