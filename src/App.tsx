@@ -18,6 +18,7 @@
  */
 
 import BaseLayout from '@/components/layout/BaseLayout'
+import Footer from '@/components/layout/Footer'
 import SceneCanvas from '@/components/scene/SceneCanvas'
 import HeroLayers from '@/components/hero/HeroLayers'
 import Hero from '@/components/sections/Hero'
@@ -81,6 +82,7 @@ function AppInner() {
         <About />
         <Standards />
         <Contact />
+        <Footer />
       </BaseLayout>
 
       {/* z-40/50 — overlay editorial de casos (fixed, fuera del layout) */}
