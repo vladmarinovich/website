@@ -82,9 +82,11 @@ export default function Contact() {
   // Se disuelve a medida que la imagen crece y toma todo el espacio
   const darkBgOpacity = useTransform(scrollYProgress, [0, 0.30], [1, 0])
 
-  // ── Contenido — aparece sobre el blanco de la imagen ────────
-  const contentOpacity = useTransform(scrollYProgress, [0.55, 0.72], [0, 1])
-  const contentY       = useTransform(scrollYProgress, [0.55, 0.72], [32, 0])
+  // ── Contenido — aparece cuando la imagen llega a escala ~2.3x ──
+  // scrollYProgress 0.36 → imagen a ~60% del tamaño final (tunnel aún visible)
+  // scrollYProgress 0.50 → imagen completamente dominante, texto plenamente visible
+  const contentOpacity = useTransform(scrollYProgress, [0.36, 0.50], [0, 1])
+  const contentY       = useTransform(scrollYProgress, [0.36, 0.50], [32, 0])
 
   return (
     // Sección exterior 280vh — da el recorrido necesario para las 3 fases
