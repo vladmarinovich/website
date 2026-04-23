@@ -1,16 +1,15 @@
 /**
  * Sección Hero — solo el copy.
  *
- * Las capas visuales (imagen, portal, filamentos, overlays) viven en
- * HeroLayers (fixed, z-1, nivel raíz) y se disuelven independientemente.
+ * Estructura tipográfica:
+ *   eyebrow (tesis)  → "INFRAESTRUCTURA QUE PIENSA."
+ *   H1 (desarrollo)  → subtitle con la tensión del problema
+ *   supporting       → línea callada que da el horizonte ("120 días…")
+ *   CTAs             → acción primaria + secundaria
  *
- * Esta sección solo contiene el copy DOM anclado en la parte inferior.
- * El copy desaparece (fade up) durante el primer 22% del viewport height
- * de scroll — antes de que el fondo empiece su disolución (0.55vh).
- *
- * La sección ocupa 100vh para dar el espacio visual del hero.
- * Al terminar, la siguiente sección (Evidence) entra al viewport
- * exactamente cuando HeroLayers llega a opacity 0 → cross-dissolve.
+ * Las capas visuales viven en HeroLayers (fixed, z-1).
+ * El copy desaparece (fade up) durante el primer 22% del viewport
+ * de scroll — antes de que el fondo empiece su disolución.
  */
 
 import { motion, useScroll, useTransform } from 'framer-motion'
@@ -29,41 +28,48 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative h-screen flex items-end pb-24 px-6 md:px-12"
+      className="relative h-screen flex items-end pb-28 px-6 md:px-12"
     >
       <motion.div
         className="relative z-10 max-w-7xl mx-auto w-full"
         style={{ opacity: copyOpacity, y: copyY, willChange: 'opacity, transform' }}
       >
-        <FadeUp delay={0.05}>
-          <p className="font-mono text-sm tracking-[0.22em] text-accent-cyan mb-6 uppercase">
+        <FadeUp kind="eyebrow" delay={0.05}>
+          <p className="font-mono text-xs md:text-sm tracking-[0.28em] text-accent-cyan mb-8 uppercase">
             {siteCopy.hero.eyebrow}
           </p>
         </FadeUp>
 
-        <FadeUp delay={0.15}>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-textPrimary leading-none tracking-tight max-w-4xl mb-6">
-            {siteCopy.hero.title}
+        {/* El subtitle opera como H1 visual — la tesis vive aquí */}
+        <FadeUp kind="title" delay={0.18}>
+          <h1 className="text-textPrimary font-semibold leading-[1.04] tracking-[-0.02em] max-w-5xl mb-8 text-4xl md:text-6xl lg:text-7xl">
+            {siteCopy.hero.subtitle}
           </h1>
         </FadeUp>
 
-        <FadeUp delay={0.25}>
-          <p className="text-textSecondary text-xl md:text-2xl max-w-2xl leading-relaxed mb-10">
-            {siteCopy.hero.subtitle}
+        <FadeUp kind="body" delay={0.42}>
+          <p className="text-textSecondary/90 text-lg md:text-xl max-w-2xl leading-[1.55] mb-12">
+            {siteCopy.hero.supporting}
           </p>
         </FadeUp>
 
-        <FadeUp delay={0.35}>
-          <div className="flex flex-wrap gap-4">
+        <FadeUp kind="body" delay={0.55}>
+          <div className="flex flex-wrap items-center gap-4">
             <a
               href="#contact"
-              className="px-7 py-3.5 bg-accent-cyan text-background font-mono text-sm tracking-[0.12em] uppercase rounded-sm hover:opacity-90 transition-opacity"
+              className="group inline-flex items-center gap-3 px-7 py-3.5 bg-accent-cyan text-background font-mono text-sm tracking-[0.14em] uppercase rounded-sm hover:opacity-90 transition-opacity"
             >
-              {siteCopy.hero.ctaPrimary}
+              <span>{siteCopy.hero.ctaPrimary}</span>
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-300 group-hover:translate-x-1"
+              >
+                →
+              </span>
             </a>
             <a
               href="#evidence"
-              className="px-7 py-3.5 border border-white/15 text-textSecondary font-mono text-sm tracking-[0.12em] uppercase rounded-sm hover:border-white/30 hover:text-textPrimary transition-all"
+              className="inline-flex items-center gap-2 px-7 py-3.5 text-textSecondary hover:text-textPrimary font-mono text-sm tracking-[0.14em] uppercase transition-colors underline-offset-[6px] hover:underline"
             >
               {siteCopy.hero.ctaSecondary}
             </a>
