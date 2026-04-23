@@ -36,7 +36,7 @@ export default function Hero() {
         style={{ opacity: copyOpacity, y: copyY, willChange: 'opacity, transform' }}
       >
         <FadeUp delay={0.05}>
-          <p className="font-mono text-xs tracking-[0.25em] text-accent-cyan mb-6 uppercase">
+          <p className="font-mono text-sm tracking-[0.22em] text-accent-cyan mb-6 uppercase">
             {siteCopy.hero.eyebrow}
           </p>
         </FadeUp>
@@ -57,13 +57,13 @@ export default function Hero() {
           <div className="flex flex-wrap gap-4">
             <a
               href="#contact"
-              className="px-6 py-3 bg-accent-cyan text-background font-mono text-xs tracking-[0.15em] uppercase rounded-sm hover:opacity-90 transition-opacity"
+              className="px-7 py-3.5 bg-accent-cyan text-background font-mono text-sm tracking-[0.12em] uppercase rounded-sm hover:opacity-90 transition-opacity"
             >
               {siteCopy.hero.ctaPrimary}
             </a>
             <a
               href="#evidence"
-              className="px-6 py-3 border border-white/10 text-textSecondary font-mono text-xs tracking-[0.15em] uppercase rounded-sm hover:border-white/25 hover:text-textPrimary transition-all"
+              className="px-7 py-3.5 border border-white/15 text-textSecondary font-mono text-sm tracking-[0.12em] uppercase rounded-sm hover:border-white/30 hover:text-textPrimary transition-all"
             >
               {siteCopy.hero.ctaSecondary}
             </a>
