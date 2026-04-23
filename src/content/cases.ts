@@ -102,6 +102,6 @@ export const cases: CaseStudy[] = [
     assets: [
       { src: '/assets/cases/orionbi/mockup.webp', alt: 'Orion BI — plataforma de inteligencia publicitaria', kind: 'full' },
     ],
-    stack: ['React', 'Tailwind', 'MongoDB', 'PostgreSQL', 'Meta Ads API', 'Google Ads API', 'TikTok API'],
+    stack: ['React', 'Tailwind', 'MongoDB', 'PostgREST', 'Meta Ads API', 'Google Ads API', 'TikTok API'],
   },
 ]
