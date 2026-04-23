@@ -3,9 +3,6 @@
  *
  * Dos columnas: lista afirmativa (cyan) y lista negativa (blanco tenue).
  * Los indicadores son puntos de 4px para máxima limpieza visual.
- *
- * Legibilidad: body text a text-xl, items de lista a text-base,
- * sub-headers de columna con más visibilidad.
  */
 
 import { siteCopy } from '@/content/siteCopy'
@@ -19,7 +16,7 @@ export default function Standards() {
       <div className="max-w-7xl mx-auto">
 
         <FadeUp>
-          <p className="font-mono text-xs tracking-[0.25em] text-textSecondary mb-6 uppercase">
+          <p className="font-mono text-sm tracking-[0.22em] text-textSecondary mb-6 uppercase">
             {c.eyebrow}
           </p>
 
@@ -37,14 +34,14 @@ export default function Standards() {
 
           {/* Con quién SÍ */}
           <FadeUp delay={0.08}>
-            <p className="font-mono text-xs tracking-[0.2em] text-textSecondary/60 mb-6 uppercase">
+            <p className="font-mono text-sm tracking-[0.18em] text-textSecondary/70 mb-6 uppercase">
               {c.yesTitle}
             </p>
-            <ul className="space-y-4">
+            <ul className="space-y-5">
               {c.yesItems.map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-textSecondary">
-                  <span className="mt-2 w-1 h-1 rounded-full bg-accent-cyan shrink-0" />
-                  <span className="text-base leading-relaxed">{item}</span>
+                  <span className="mt-2.5 w-1 h-1 rounded-full bg-accent-cyan shrink-0" />
+                  <span className="text-lg leading-relaxed">{item}</span>
                 </li>
               ))}
             </ul>
@@ -52,14 +49,14 @@ export default function Standards() {
 
           {/* Con quién NO */}
           <FadeUp delay={0.16}>
-            <p className="font-mono text-xs tracking-[0.2em] text-textSecondary/60 mb-6 uppercase">
+            <p className="font-mono text-sm tracking-[0.18em] text-textSecondary/70 mb-6 uppercase">
               {c.noTitle}
             </p>
-            <ul className="space-y-4">
+            <ul className="space-y-5">
               {c.noItems.map((item, i) => (
-                <li key={i} className="flex items-start gap-3 text-textSecondary/60">
-                  <span className="mt-2 w-1 h-1 rounded-full bg-white/25 shrink-0" />
-                  <span className="text-base leading-relaxed">{item}</span>
+                <li key={i} className="flex items-start gap-3 text-textSecondary/80">
+                  <span className="mt-2.5 w-1 h-1 rounded-full bg-white/30 shrink-0" />
+                  <span className="text-lg leading-relaxed">{item}</span>
                 </li>
               ))}
             </ul>
