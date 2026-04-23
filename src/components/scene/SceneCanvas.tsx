@@ -66,25 +66,41 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 // Esto crea una sensación de inercia sin librerías extra.
 function CameraRig() {
   const { camera } = useThree()
-  const smooth = useRef(0)  // progreso suavizado independiente del store
+  const smooth      = useRef(0)   // progreso de scroll suavizado
+  const heroSmooth  = useRef(0)   // heroTransitionProgress suavizado
 
   useFrame(() => {
-    // Leer el progreso de scroll sin suscribirse a React
-    const raw = useSceneStore.getState().progress
+    const { progress: raw, heroTransitionProgress } = useSceneStore.getState()
+    const cam = camera as THREE.PerspectiveCamera
 
-    // Suavizado de primer orden — factor 0.055 = transición ~18 frames
+    // ── Scroll progress ──────────────────────────────────────
     smooth.current = lerp(smooth.current, raw, 0.055)
+    const scrollT  = Math.min(smooth.current * 0.88, 0.88)
 
-    // Limitar al 88% del recorrido para no salir del final de la curva
-    const t      = Math.min(smooth.current * 0.88, 0.88)
-    const ahead  = Math.min(t + 0.025, 0.999) // punto de mirada 2.5% adelante
+    // ── Hero transition dive ─────────────────────────────────
+    // Durante el fade del hero la cámara avanza hacia la entrada del túnel
+    // y el FOV se expande — sensación de ser tragado por el corredor.
+    heroSmooth.current = lerp(heroSmooth.current, heroTransitionProgress, 0.055)
+    const h      = heroSmooth.current
+    // Dive: avanza hasta el 9% del PATH (boca del corredor)
+    const diveT  = h * 0.09
+    // Tomar la posición más adelante entre scroll normal y dive
+    const t      = Math.max(scrollT, diveT)
+    const ahead  = Math.min(t + 0.025, 0.999)
 
     const pos  = PATH.getPoint(t)
     const look = PATH.getPoint(ahead)
 
-    // Lerp adicional en la posición de la cámara para más suavidad
-    camera.position.lerp(pos, 0.12)
+    camera.position.lerp(pos, 0.10)
     camera.lookAt(look)
+
+    // FOV: 72° en reposo → 100° en el pico del dive → se queda en ~88° después
+    // Curva: sube rápido al entrar, se asienta en un valor ligeramente más abierto
+    const targetFov = h < 1
+      ? lerp(72, 100, h)          // expansión durante el fade
+      : lerp(100, 88, Math.min(1, (smooth.current * 4)))  // asienta en 88° post-hero
+    cam.fov = lerp(cam.fov, targetFov, 0.07)
+    cam.updateProjectionMatrix()
   })
 
   return null
