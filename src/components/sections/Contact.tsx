@@ -1,35 +1,40 @@
 /**
  * Contact — sección de cierre. Fase 5: "La luz al final del túnel".
  *
- * Secuencia dirigida por scroll:
- *  1. Ves la imagen del corredor (la misma que el hero, pero iluminada)
- *  2. Scrolleas → la cámara se acerca al rectángulo de luz blanca (zoom 1x → 4x)
- *  3. El blanco llena la pantalla completa
- *  4. Aparece el título y el CTA sobre el blanco
+ * Secuencia de tres fases dirigida por scroll:
  *
- * Estructura:
- *  - Sección exterior: 220vh — da el recorrido de scroll necesario
+ *  Fase 1 (0%–28%):  imagen aparece pequeña (12% del viewport) y crece
+ *                     hasta ocupar la pantalla completa. El fondo oscuro
+ *                     se disuelve a medida que la imagen toma el espacio.
+ *
+ *  Fase 2 (28%–52%): zoom continúa hacia el rectángulo de luz blanca
+ *                     (1x → 4.2x). La cámara "entra" al corredor.
+ *
+ *  Fase 3 (40%–72%): la pantalla se llena de blanco y aparece el CTA.
+ *
+ * Estructura DOM:
+ *  - Sección exterior: 280vh — da el recorrido de scroll necesario
  *  - Contenedor sticky h-screen: permanece fijo mientras la sección scrollea
- *
- * Capas (fondo → frente):
- *  1. FooterBackground  → imagen con zoom scroll-driven (1.0 → 4.0)
- *  2. WhiteScreen       → overlay blanco que aparece cuando el zoom está al máximo
- *  3. Contenido CTA     → texto negro, aparece sobre el blanco
  */
 
 import { useRef } from 'react'
 import { motion, useScroll, useTransform, type MotionValue } from 'framer-motion'
 import { siteCopy } from '@/content/siteCopy'
 
-/* ── FooterBackground — zoom scroll-driven hacia la luz ────── */
-// Mismo patrón que HeroBackground. El zoom lleva la cámara desde
-// la vista general del corredor hasta el interior del rectángulo blanco.
-// A escala ~4x, la zona blanca de la imagen llena el viewport completo.
-function FooterBackground({ scale }: { scale: MotionValue<number> }) {
+/* ── FooterImage — imagen con wrapper animado ───────────────── */
+// El wrapper controla borderRadius (de 10px a 0) y overflow hidden.
+// La imagen interior escala via el scale prop del padre.
+function FooterImage({
+  scale,
+  borderRadius,
+}: {
+  scale: MotionValue<number>
+  borderRadius: MotionValue<number>
+}) {
   return (
     <motion.div
       className="absolute inset-0"
-      style={{ scale, willChange: 'transform', transformOrigin: 'center center' }}
+      style={{ scale, willChange: 'transform', transformOrigin: 'center center', borderRadius }}
     >
       <picture>
         <source
@@ -54,40 +59,55 @@ export default function Contact() {
   const c = siteCopy.contact
   const sectionRef = useRef<HTMLElement>(null)
 
-  // Lectura del scroll relativa a la sección:
-  // 0 → sección alineada en el tope del viewport
-  // 1 → sección completamente scrolleada (fondo alineado con el tope)
+  // scrollYProgress: 0 cuando la sección está en el tope del viewport,
+  // 1 cuando el fondo de la sección llega al tope (280vh de recorrido)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end end'],
   })
 
-  // ── Zoom: 1.0 → 4.0 en el primer 48% del recorrido ──────────
-  // A escala ~4x el rectángulo blanco central de la imagen llena el viewport.
-  // clamp(1, 4) para que no escale más allá del blanco.
-  const bgScale = useTransform(scrollYProgress, [0, 0.48], [1.0, 4.0])
+  // ── Fase 1 + 2: escala de la imagen ─────────────────────────
+  // 0→0.28:  0.12 → 1.0  (imagen pequeña crece hasta llenar pantalla)
+  // 0.28→0.52: 1.0 → 4.2  (zoom continúa hacia el blanco)
+  const bgScale = useTransform(
+    scrollYProgress,
+    [0,    0.28, 0.52],
+    [0.12, 1.0,  4.2 ]
+  )
 
-  // ── Pantalla blanca: aparece mientras el zoom completa (35%→52%) ─
-  // Garantiza un blanco 100% limpio y oculta los bordes del zoom.
-  const whiteOpacity = useTransform(scrollYProgress, [0.35, 0.54], [0, 1])
+  // ── Border radius: cuadrado pequeño → sin bordes al llenar pantalla
+  const bgRadius = useTransform(scrollYProgress, [0, 0.22], [10, 0])
 
-  // ── Contenido: aparece sobre el blanco (53%→70%) ─────────────
-  const contentOpacity = useTransform(scrollYProgress, [0.53, 0.70], [0, 1])
-  const contentY       = useTransform(scrollYProgress, [0.53, 0.70], [28, 0])
+  // ── Fondo oscuro detrás de la imagen (visible en Fase 1) ─────
+  // Se disuelve a medida que la imagen crece y toma todo el espacio
+  const darkBgOpacity = useTransform(scrollYProgress, [0, 0.30], [1, 0])
+
+  // ── Pantalla blanca — aparece cuando el zoom está al máximo ──
+  const whiteOpacity = useTransform(scrollYProgress, [0.40, 0.56], [0, 1])
+
+  // ── Contenido — aparece sobre el blanco ──────────────────────
+  const contentOpacity = useTransform(scrollYProgress, [0.55, 0.72], [0, 1])
+  const contentY       = useTransform(scrollYProgress, [0.55, 0.72], [32, 0])
 
   return (
-    // Sección exterior: 220vh — el scroll extra es lo que impulsa el zoom
+    // Sección exterior 280vh — da el recorrido necesario para las 3 fases
     <section
       id="contact"
       ref={sectionRef}
       className="relative"
-      style={{ minHeight: '220vh' }}
+      style={{ minHeight: '280vh' }}
     >
       {/* Contenedor sticky: permanece fijo mientras la sección scrollea */}
       <div className="sticky top-0 h-screen overflow-hidden">
 
-        {/* z-0 — imagen con zoom dramático hacia el blanco */}
-        <FooterBackground scale={bgScale} />
+        {/* z-0 — fondo negro del que "emerge" la imagen en Fase 1 */}
+        <motion.div
+          className="absolute inset-0 bg-background"
+          style={{ opacity: darkBgOpacity }}
+        />
+
+        {/* z-0 — imagen con zoom en 3 fases */}
+        <FooterImage scale={bgScale} borderRadius={bgRadius} />
 
         {/* z-10 — pantalla blanca que sella el zoom */}
         <motion.div
@@ -95,7 +115,7 @@ export default function Contact() {
           style={{ opacity: whiteOpacity }}
         />
 
-        {/* z-20 — CTA sobre el blanco — texto negro */}
+        {/* z-20 — CTA sobre el blanco */}
         <motion.div
           className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 md:px-12"
           style={{ opacity: contentOpacity, y: contentY }}
@@ -115,7 +135,6 @@ export default function Contact() {
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center mb-8">
-              {/* CTA primario — negro sobre blanco */}
               <a
                 href="https://wa.link/ohnau7"
                 target="_blank"
@@ -124,8 +143,6 @@ export default function Contact() {
               >
                 {c.ctaPrimary}
               </a>
-
-              {/* CTA secundario — borde fino oscuro */}
               <a
                 href="mailto:consultor@vladmarinovich.com"
                 className="px-8 py-4 border border-black/20 text-black/65 font-mono text-sm tracking-[0.14em] uppercase rounded-sm hover:border-black/40 hover:text-black transition-all"
