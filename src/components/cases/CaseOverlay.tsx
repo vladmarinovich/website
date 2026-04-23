@@ -103,13 +103,13 @@ export function CaseOverlay() {
 
           {/* Panel principal */}
           <motion.div
-            className="fixed inset-0 z-50 overflow-y-auto"
+            className="fixed inset-0 z-50 flex flex-col"
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.45, ease: [0.25, 0.4, 0.25, 1] }}
           >
-            <div className="min-h-screen bg-surface">
+            <div className="h-full overflow-y-auto bg-surface">
 
               {/* Header sticky */}
               <div className="sticky top-0 z-10 flex items-center justify-between px-8 md:px-16 py-5 bg-surface/95 backdrop-blur-md border-b border-white/[0.06]">
