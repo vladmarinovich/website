@@ -58,22 +58,31 @@ const PATH = new THREE.CatmullRomCurve3([
 // No uniforme: clusters apretados alternan con vacíos — se lee como
 // arquitectura (pilares, vigas), no como colonia de demo CatmullRom.
 // 15 anillos en lugar de 22 — menos presencia, más peso por unidad.
+// Distribución espaciada (no clusters apretados). Los clusters del
+// commit anterior se leían como "radar/bullseye" cuando la cámara los
+// miraba de frente en los gaps entre secciones: anillos perfectos
+// concéntricos al mismo eje crean efecto diana. Ahora los anillos se
+// separan más entre sí para romper esa lectura.
 const RING_T = [
-  0.06, 0.095,                 // cluster en la entrada
-  0.20,
-  0.30, 0.335,                 // par
-  0.42,
-  0.52, 0.555, 0.60,           // tripleta media
-  0.69,
-  0.76,
-  0.83, 0.865,                 // par al fondo
-  0.93,
-  0.975,
+  0.08,
+  0.16,
+  0.24,
+  0.33,
+  0.41,
+  0.49,
+  0.56,
+  0.63,
+  0.71,
+  0.78,
+  0.84,
+  0.90,
+  0.95,
 ]
 
-// Índices de anillos con tilt sutil fuera del eje — rompe la
-// perfección concéntrica sin que se lea como error.
-const RING_TILT = new Set([2, 7, 11])
+// Tilt sutil (~8°) en varios anillos — rompe concentricidad perfecta
+// cuando la cámara los mira de frente. Más del 40% con tilt para
+// garantizar que nunca se vea un "radar" limpio.
+const RING_TILT = new Set([1, 3, 5, 7, 9, 11])
 
 // Interpolación lineal — usada para suavizar posición, colores y opacidades por frame
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
@@ -158,8 +167,8 @@ function Rings() {
   const ringRefs      = useRef<(THREE.Mesh | null)[]>(Array(RING_T.length).fill(null))
   const innerRingRefs = useRef<(THREE.Mesh | null)[]>([])
   const ringCol       = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
-  const ringOpacity   = useRef(0.28)
-  const innerOpacity  = useRef(0.15)
+  const ringOpacity   = useRef(0.14)
+  const innerOpacity  = useRef(0.07)
 
   const ringData = useMemo(() => {
     const zAxis = new THREE.Vector3(0, 0, 1)
@@ -171,15 +180,22 @@ function Rings() {
       const quat = new THREE.Quaternion()
       quat.setFromUnitVectors(zAxis, tangent)
 
-      // Tilt sutil (~7°) para romper concentricidad perfecta
+      // Tilt ~8° en el eje Y, alternando dirección — rompe la lectura
+      // concéntrica perfecta cuando la cámara mira los anillos de frente.
+      // También un jitter pequeño en eje X para el mismo propósito.
       if (RING_TILT.has(i)) {
         const tilt = new THREE.Quaternion()
-        tilt.setFromAxisAngle(yAxis, (i % 2 === 0 ? 1 : -1) * 0.12)
+        tilt.setFromAxisAngle(yAxis, (i % 2 === 0 ? 1 : -1) * 0.14)
         quat.multiply(tilt)
+        const xTilt = new THREE.Quaternion()
+        xTilt.setFromAxisAngle(new THREE.Vector3(1, 0, 0), (i % 3 === 0 ? 1 : -1) * 0.08)
+        quat.multiply(xTilt)
       }
 
-      // Ritmo de escala: distribución menos mecánica que i%3
-      const scale = i === 2 || i === 6 || i === 9 || i === 13 ? 1.08 : 0.94
+      // Variabilidad fuerte de escala — radios diferentes impiden que
+      // los anillos stackeen como círculos concéntricos del mismo tamaño.
+      const scaleTable = [0.88, 1.04, 0.94, 1.10, 0.90, 0.98, 1.06, 0.92, 1.02, 0.96, 1.08, 0.94, 1.00]
+      const scale = scaleTable[i] ?? 1.0
       return { pos, quat, scale }
     })
   }, [])
@@ -191,10 +207,11 @@ function Rings() {
     // Interpolación de color — factor 0.045 ≈ 22 frames de transición
     ringCol.current.lerp(new THREE.Color(target.ring), 0.045)
 
-    // Interpolación de opacidad — proporcional a tunnelIntensity
-    // Mínimo 0.04 para que los anillos nunca desaparezcan completamente
-    const targetMainOpacity  = Math.max(0.04, 0.28 * tunnelIntensity)
-    const targetInnerOpacity = Math.max(0.02, 0.15 * tunnelIntensity)
+    // Opacidad proporcional a tunnelIntensity — base reducida para
+    // que los anillos nunca se lean como radar/bullseye en los gaps
+    // entre secciones.
+    const targetMainOpacity  = Math.max(0.02, 0.16 * tunnelIntensity)
+    const targetInnerOpacity = Math.max(0.01, 0.08 * tunnelIntensity)
     ringOpacity.current  = lerp(ringOpacity.current,  targetMainOpacity,  0.03)
     innerOpacity.current = lerp(innerOpacity.current, targetInnerOpacity, 0.03)
 
@@ -215,9 +232,9 @@ function Rings() {
     })
   })
 
-  // Subset editorial para anillos interiores — solo 4, no cada 3er índice.
-  // Menos presencia, más peso por aparición.
-  const INNER_INDICES = [3, 6, 9, 12]
+  // Subset editorial para anillos interiores — solo 3 índices no
+  // alineados con los principales para evitar dobles concéntricos.
+  const INNER_INDICES = [2, 6, 10]
   const innerRingData = useMemo(
     () => INNER_INDICES.map((i) => ringData[i]).filter(Boolean),
     [ringData]
@@ -239,7 +256,7 @@ function Rings() {
           <meshBasicMaterial
             color={MODE_PALETTE.cyan.ring}
             transparent
-            opacity={0.28}
+            opacity={0.14}
           />
         </mesh>
       ))}
@@ -256,7 +273,7 @@ function Rings() {
           <meshBasicMaterial
             color={MODE_PALETTE.cyan.ring}
             transparent
-            opacity={0.14}
+            opacity={0.07}
           />
         </mesh>
       ))}

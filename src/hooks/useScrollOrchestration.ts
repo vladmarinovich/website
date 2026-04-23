@@ -26,17 +26,21 @@ import type { ColorMode, SceneSection } from '@/types/scene'
  * bloomStrength: intensidad del efecto bloom en postprocesado
  *   — sube al llegar a contact para el burst de luz blanca.
  */
+// Curva de atenuación fuerte — el brief pide "presencia tenue en la
+// parte media". Los anillos nunca deben dominar el frame cuando el
+// contenido está entrando/saliendo: cyan del hero es el pico, luego
+// el túnel se retira para que el contenido narre.
 const SECTION_STATES: Record<SceneSection, {
   color: ColorMode
   tunnelIntensity: number
   bloomStrength: number
 }> = {
   hero:         { color: 'cyan',    tunnelIntensity: 1.00, bloomStrength: 0.85 },
-  evidence:     { color: 'cyan',    tunnelIntensity: 0.75, bloomStrength: 0.60 },
-  capabilities: { color: 'purple',  tunnelIntensity: 0.65, bloomStrength: 0.50 },
-  thinking:     { color: 'neutral', tunnelIntensity: 0.45, bloomStrength: 0.35 },
-  about:        { color: 'orange',  tunnelIntensity: 0.35, bloomStrength: 0.30 },
-  standards:    { color: 'neutral', tunnelIntensity: 0.25, bloomStrength: 0.20 },
+  evidence:     { color: 'cyan',    tunnelIntensity: 0.45, bloomStrength: 0.45 },
+  capabilities: { color: 'purple',  tunnelIntensity: 0.35, bloomStrength: 0.35 },
+  thinking:     { color: 'neutral', tunnelIntensity: 0.22, bloomStrength: 0.25 },
+  about:        { color: 'orange',  tunnelIntensity: 0.18, bloomStrength: 0.22 },
+  standards:    { color: 'neutral', tunnelIntensity: 0.12, bloomStrength: 0.18 },
   contact:      { color: 'white',   tunnelIntensity: 0.00, bloomStrength: 1.80 },
 }
 
