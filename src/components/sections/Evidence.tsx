@@ -1,43 +1,49 @@
 /**
- * Sección Evidence — casos de estudio.
+ * Sección Evidence — casos de estudio reales.
  *
- * Introduce los tres proyectos con copy de contexto.
- * Las tarjetas de casos son el punto de entrada al panel
- * expandido editorial (Fase 4 — aún pendiente).
- *
- * Legibilidad: body text a text-xl.
+ * Grid de 3 CaseCards que abren el overlay editorial al hacer click.
+ * El CaseOverlay vive en App.tsx (fuera de esta sección) para que
+ * el fixed positioning opere desde el contexto raíz.
  */
 
 import { siteCopy } from '@/content/siteCopy'
+import { cases } from '@/content/cases'
+import { useCaseStore } from '@/store/caseStore'
 import { FadeUp } from '@/components/ui/FadeUp'
+import { CaseCard } from '@/components/cases/CaseCard'
 
 export default function Evidence() {
-  const c = siteCopy.evidence
+  const c       = siteCopy.evidence
+  const openCase = useCaseStore((s) => s.openCase)
 
   return (
     <section id="evidence" className="relative py-32 px-6 md:px-12">
       <div className="max-w-7xl mx-auto">
 
+        {/* Encabezado */}
         <FadeUp>
-          <p className="font-mono text-xs tracking-[0.25em] text-accent-cyan mb-6 uppercase">
+          <p className="font-mono text-sm tracking-[0.22em] text-accent-cyan mb-6 uppercase">
             {c.eyebrow}
           </p>
-
           <h2 className="text-4xl md:text-6xl font-bold text-textPrimary leading-none tracking-tight mb-6">
             {c.title}
           </h2>
-
           <p className="text-textSecondary text-xl max-w-2xl leading-relaxed">
             {c.body}
           </p>
         </FadeUp>
 
-        {/* Placeholder — se reemplaza en Fase 4 con las tarjetas reales */}
-        <FadeUp delay={0.12}>
-          <div className="mt-16 border border-white/[0.06] rounded-sm p-8 text-textSecondary/30 font-mono text-xs tracking-widest text-center">
-            CASE STUDIES — FASE 4
-          </div>
-        </FadeUp>
+        {/* Grid de casos */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cases.map((caseStudy, i) => (
+            <CaseCard
+              key={caseStudy.id}
+              caseStudy={caseStudy}
+              index={i}
+              onClick={() => openCase(caseStudy.id)}
+            />
+          ))}
+        </div>
 
       </div>
     </section>
