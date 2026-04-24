@@ -17,8 +17,9 @@
  *  4. useScrollOrchestration → sección activa + estado completo de escena
  */
 
+import { lazy, Suspense } from 'react'
 import BaseLayout from '@/components/layout/BaseLayout'
-import SceneCanvas from '@/components/scene/SceneCanvas'
+const SceneCanvas = lazy(() => import('@/components/scene/SceneCanvas'))
 import HeroLayers from '@/components/hero/HeroLayers'
 import Hero from '@/components/sections/Hero'
 import Evidence from '@/components/sections/Evidence'
@@ -63,8 +64,10 @@ function AppInner() {
 
   return (
     <>
-      {/* z-0 — tunnel 3D de fondo */}
-      <SceneCanvas />
+      {/* z-0 — tunnel 3D de fondo (lazy: Three.js ~420KB no bloquea el parse inicial) */}
+      <Suspense fallback={null}>
+        <SceneCanvas />
+      </Suspense>
 
       {/* z-1 — fondo del hero, fixed, se disuelve con scroll */}
       <HeroLayers />
