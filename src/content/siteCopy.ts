@@ -118,7 +118,7 @@ export const siteCopy = {
     ctaPrimary:  'Agendar una llamada',
     ctaSecondary:'Escribir directo',
     microcopy:   'Respondo el mismo día.',
-    colophon:    'Diseñado, construido y operado por mí.\nGeist · Geist Mono · Three.js r169 · 2026.',
+    colophon:    'Diseñado, construido y operado por mí.\nGeist · Geist Mono · Three.js r184 · 2026.',
   },
 
   footer: {
