@@ -31,6 +31,7 @@ import Standards from '@/components/sections/Standards'
 import Contact from '@/components/sections/Contact'
 import { CaseOverlay } from '@/components/cases/CaseOverlay'
 import { Preloader } from '@/components/ui/Preloader'
+import { CustomCursor } from '@/components/ui/CustomCursor'
 import { useLenis } from '@/hooks/useLenis'
 import { useScrollProgress } from '@/hooks/useScrollProgress'
 import { useDeviceTier } from '@/hooks/useDeviceTier'
@@ -95,6 +96,9 @@ function AppInner() {
 
       {/* z-60 — preloader: firma sobre fondo negro hasta que el canvas esté listo */}
       <Preloader />
+
+      {/* cursor personalizado — solo desktop (pointer: fine), encima de todo */}
+      <CustomCursor />
     </>
   )
 }
