@@ -14,18 +14,21 @@ type UIStore = {
   deviceTier: DeviceTier
   reducedMotion: boolean
   navVisible: boolean
+  sceneReady: boolean
   setDeviceTier: (tier: DeviceTier) => void
   setReducedMotion: (value: boolean) => void
   setNavVisible: (value: boolean) => void
+  setSceneReady: (value: boolean) => void
 }
 
 export const useUIStore = create<UIStore>((set) => ({
-  // Asumimos dispositivo de alta gama hasta que el hook detecte lo contrario
   deviceTier: 'high',
   reducedMotion: false,
   navVisible: true,
+  sceneReady: false,
 
   setDeviceTier:    (tier)  => set({ deviceTier: tier }),
   setReducedMotion: (value) => set({ reducedMotion: value }),
   setNavVisible:    (value) => set({ navVisible: value }),
+  setSceneReady:    (value) => set({ sceneReady: value }),
 }))

@@ -30,6 +30,7 @@ import About from '@/components/sections/About'
 import Standards from '@/components/sections/Standards'
 import Contact from '@/components/sections/Contact'
 import { CaseOverlay } from '@/components/cases/CaseOverlay'
+import { Preloader } from '@/components/ui/Preloader'
 import { useLenis } from '@/hooks/useLenis'
 import { useScrollProgress } from '@/hooks/useScrollProgress'
 import { useDeviceTier } from '@/hooks/useDeviceTier'
@@ -91,6 +92,9 @@ function AppInner() {
 
       {/* z-40/50 — overlay editorial de casos (fixed, fuera del layout) */}
       <CaseOverlay />
+
+      {/* z-60 — preloader: firma sobre fondo negro hasta que el canvas esté listo */}
+      <Preloader />
     </>
   )
 }
