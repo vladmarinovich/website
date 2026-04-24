@@ -70,7 +70,7 @@ export function Preloader() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 0.88, y: 0 }}
             transition={{ duration: 0.9, ease: EASE, delay: 0.1 }}
-            className="h-16 md:h-20 w-auto invert"
+            className="h-24 md:h-32 w-auto invert"
             draggable={false}
           />
 
