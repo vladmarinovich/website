@@ -29,6 +29,8 @@ import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import type { BloomEffect } from 'postprocessing'
 import { useSceneStore } from '@/store/sceneStore'
+import { useUIStore } from '@/store/uiStore'
+import type { DeviceTier } from '@/types/scene'
 
 /* ── Paleta de colores por modo ──────────────────────────── */
 // ring  → color principal del anillo (visible)
@@ -87,6 +89,55 @@ const RING_TILT = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
 // Interpolación lineal — usada para suavizar posición, colores y opacidades por frame
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
+/* ── Configuración de calidad por tier ───────────────────── */
+// Cada tier reduce geometría, partículas y resolución de render
+// para mantener 60fps en dispositivos de gama baja/media.
+const QUALITY: Record<DeviceTier, {
+  tunnelSegments: number
+  ringRadial: number
+  ringTubular: number
+  innerRingTubular: number
+  particleNearCount: number
+  particleFarCount: number
+  texSize: number
+  showInnerRings: boolean
+  mipmapBlur: boolean
+}> = {
+  high: {
+    tunnelSegments:    240,
+    ringRadial:         16,
+    ringTubular:        96,
+    innerRingTubular:   96,
+    particleNearCount:  90,
+    particleFarCount:  320,
+    texSize:            64,
+    showInnerRings:   true,
+    mipmapBlur:       true,
+  },
+  medium: {
+    tunnelSegments:    160,
+    ringRadial:         12,
+    ringTubular:        72,
+    innerRingTubular:   64,
+    particleNearCount:  55,
+    particleFarCount:  180,
+    texSize:            32,
+    showInnerRings:   true,
+    mipmapBlur:       true,
+  },
+  low: {
+    tunnelSegments:     90,
+    ringRadial:          8,
+    ringTubular:        48,
+    innerRingTubular:   48,
+    particleNearCount:  30,
+    particleFarCount:   80,
+    texSize:            32,
+    showInnerRings:  false,
+    mipmapBlur:      false,
+  },
+}
+
 /* ── CameraRig ───────────────────────────────────────────── */
 // Mueve la cámara a lo largo de PATH en función del progreso de scroll.
 // Doble lerp: el store actualiza smooth.current, y la cámara sigue a smooth.current.
@@ -138,9 +189,11 @@ function CameraRig() {
 // Material casi negro con roughness alto = sin reflejos, pura oscuridad.
 // 240 segmentos longitudinales para que la curva se vea suave.
 function Tunnel() {
+  const tier = useUIStore((s) => s.deviceTier)
+  const q    = QUALITY[tier]
   const geom = useMemo(
-    () => new THREE.TubeGeometry(PATH, 240, 1.9, 36, false),
-    []
+    () => new THREE.TubeGeometry(PATH, q.tunnelSegments, 1.9, 36, false),
+    [q.tunnelSegments]
   )
 
   return (
@@ -164,6 +217,8 @@ function Tunnel() {
 // Los colores hacen lerp hacia MODE_PALETTE[colorMode] en cada frame.
 // La opacidad escala con tunnelIntensity — los anillos se atenúan al bajar.
 function Rings() {
+  const tier          = useUIStore((s) => s.deviceTier)
+  const q             = QUALITY[tier]
   const ringRefs      = useRef<(THREE.Mesh | null)[]>(Array(RING_T.length).fill(null))
   const innerRingRefs = useRef<(THREE.Mesh | null)[]>([])
   const ringCol       = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
@@ -256,7 +311,7 @@ function Rings() {
           scale={scale}
         >
           {/* args: [radio, grosor, segmentos radiales, segmentos circulares] */}
-          <torusGeometry args={[1.72, 0.008, 16, 96]} />
+          <torusGeometry args={[1.72, 0.008, q.ringRadial, q.ringTubular]} />
           <meshBasicMaterial
             color={MODE_PALETTE.cyan.ring}
             transparent
@@ -265,15 +320,15 @@ function Rings() {
         </mesh>
       ))}
 
-      {/* Anillos interiores — solo 4, más finos y tenues */}
-      {innerRingData.map(({ pos, quat }, i) => (
+      {/* Anillos interiores — omitidos en tier low para ahorrar draw calls */}
+      {q.showInnerRings && innerRingData.map(({ pos, quat }, i) => (
         <mesh
           key={`interior-${i}`}
           ref={(el) => { innerRingRefs.current[i] = el }}
           position={pos}
           quaternion={quat}
         >
-          <torusGeometry args={[1.54, 0.004, 12, 96]} />
+          <torusGeometry args={[1.54, 0.004, 12, q.innerRingTubular]} />
           <meshBasicMaterial
             color={MODE_PALETTE.cyan.ring}
             transparent
@@ -304,6 +359,7 @@ function ParticleLayer({
   driftSpeed,
   opacityBase,
   phaseOffset = 0,
+  texSize = 64,
 }: {
   count: number
   size: number
@@ -312,6 +368,7 @@ function ParticleLayer({
   driftSpeed: number
   opacityBase: number
   phaseOffset?: number
+  texSize?: number
 }) {
   const ref  = useRef<THREE.Points>(null)
   const col  = useRef(new THREE.Color(MODE_PALETTE.cyan.ring))
@@ -322,19 +379,20 @@ function ParticleLayer({
   // los puntos leen como dots suaves con glow natural.
   const dotTexture = useMemo(() => {
     const c   = document.createElement('canvas')
-    c.width   = 64
-    c.height  = 64
-    const ctx = c.getContext('2d')!
-    const g   = ctx.createRadialGradient(32, 32, 0, 32, 32, 32)
+    c.width   = texSize
+    c.height  = texSize
+    const ctx    = c.getContext('2d')!
+    const half   = texSize / 2
+    const g      = ctx.createRadialGradient(half, half, 0, half, half, half)
     g.addColorStop(0,    'rgba(255,255,255,1)')
     g.addColorStop(0.35, 'rgba(255,255,255,0.45)')
     g.addColorStop(1,    'rgba(255,255,255,0)')
     ctx.fillStyle = g
-    ctx.fillRect(0, 0, 64, 64)
+    ctx.fillRect(0, 0, texSize, texSize)
     const tex = new THREE.CanvasTexture(c)
     tex.needsUpdate = true
     return tex
-  }, [])
+  }, [texSize])
 
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3)
@@ -425,12 +483,13 @@ function Environment() {
 // sin re-renders de React, todo dentro de useFrame.
 // luminanceThreshold: 0.18 — solo los anillos brillantes activan el bloom.
 function Effects() {
-  const bloomRef        = useRef<BloomEffect>(null)
-  const currentIntensity = useRef(0.55)  // intensidad actual del bloom (interpolada)
+  const tier             = useUIStore((s) => s.deviceTier)
+  const q                = QUALITY[tier]
+  const bloomRef         = useRef<BloomEffect>(null)
+  const currentIntensity = useRef(0.55)
 
   useFrame(() => {
     const { bloomStrength } = useSceneStore.getState()
-    // Lerp hacia el target — factor 0.04 ≈ 25 frames de transición suave
     currentIntensity.current = lerp(currentIntensity.current, bloomStrength, 0.04)
     if (bloomRef.current) {
       bloomRef.current.intensity = currentIntensity.current
@@ -441,10 +500,10 @@ function Effects() {
     <EffectComposer>
       <Bloom
         ref={bloomRef}
-        intensity={0.55}             // valor inicial — sobreescrito en useFrame
-        luminanceThreshold={0.18}    // activa en elementos brillantes
-        luminanceSmoothing={0.45}    // transición gradual del bloom
-        mipmapBlur                   // bloom de alta calidad con mip maps
+        intensity={0.55}
+        luminanceThreshold={0.18}
+        luminanceSmoothing={0.45}
+        mipmapBlur={q.mipmapBlur}
       />
       <Vignette
         offset={0.38}                // inicio del oscurecimiento
@@ -459,6 +518,9 @@ function Effects() {
 // Agrupa todos los elementos de la escena.
 // Wrapped en <Suspense> en SceneCanvas para manejar la carga de geometrías.
 function SceneContent() {
+  const tier = useUIStore((s) => s.deviceTier)
+  const q    = QUALITY[tier]
+
   return (
     <>
       <Environment />
@@ -466,27 +528,25 @@ function SceneContent() {
       <Tunnel />
       <Rings />
 
-      {/* Capa cercana — partículas pequeñas (sub-pixel cerca de cámara
-          para evitar que se lean como cuadraditos de pointsMaterial).
-          Menos cantidad, más sutiles. */}
       <ParticleLayer
-        count={90}
+        count={q.particleNearCount}
         size={0.008}
         spreadXY={[3.4, 2.6]}
         zRange={[0, -14]}
         driftSpeed={0.025}
         opacityBase={0.22}
+        texSize={q.texSize}
       />
 
-      {/* Capa profunda — partículas finísimas, rápidas, al fondo */}
       <ParticleLayer
-        count={320}
+        count={q.particleFarCount}
         size={0.0035}
         spreadXY={[3.2, 2.4]}
         zRange={[-8, -30]}
         driftSpeed={0.045}
         opacityBase={0.45}
         phaseOffset={1.3}
+        texSize={q.texSize}
       />
 
       <Effects />
@@ -499,6 +559,11 @@ function SceneContent() {
 // dpr [1, 1.5] limita la resolución en pantallas de alta densidad
 // para mantener rendimiento en dispositivos de gama media.
 export default function SceneCanvas() {
+  const tier = useUIStore((s) => s.deviceTier)
+
+  const dpr      = tier === 'low'    ? [1, 1]   : tier === 'medium' ? [1, 1.2] : [1, 1.5]
+  const antialias = tier !== 'low'
+
   return (
     <div
       className="fixed inset-0 z-0"
@@ -507,8 +572,8 @@ export default function SceneCanvas() {
     >
       <Canvas
         camera={{ position: [0, 0, 0.1], fov: 72, near: 0.01, far: 50 }}
-        gl={{ antialias: true, alpha: false }}
-        dpr={[1, 1.5]}
+        gl={{ antialias, alpha: false }}
+        dpr={dpr as [number, number]}
         style={{ background: '#05070B' }}
       >
         <Suspense fallback={null}>
