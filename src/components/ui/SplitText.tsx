@@ -1,40 +1,34 @@
 /**
- * SplitText — revela texto palabra por palabra con stagger.
+ * SplitText — revela texto palabra por palabra usando variants.
  *
- * Cada palabra se envuelve en un contenedor con overflow:hidden
- * y entra desde abajo (y: 100% → 0) con delay escalonado.
- * El resultado: las palabras "caen" en lugar de fundirse — más
- * cinematográfico que un FadeUp de bloque.
+ * Patrón canónico Framer Motion:
+ *   contenedor (motion.div) con whileInView + staggerChildren
+ *   hijos (motion.span) con variants — heredan el stagger
  *
- * Uso:
- *   <SplitText delay={0.18} stagger={0.04} className="...">
- *     Tu título aquí
- *   </SplitText>
- *
- * Respeta prefers-reduced-motion: si está activo, renderiza el
- * texto plano sin ninguna animación.
+ * Esto evita el bug de whileInView en hijos individuales.
  */
 
 import { motion } from 'framer-motion'
+import type { Variants } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
-const CINEMATIC_EASE: [number, number, number, number] = [0.2, 0.65, 0.25, 1]
+const EASE: [number, number, number, number] = [0.2, 0.65, 0.25, 1]
 
 interface SplitTextProps {
   children: string
   className?: string
-  delay?: number    // delay inicial antes del primer word
-  stagger?: number  // delay entre cada word (default 0.04s)
-  duration?: number // duración por word (default 0.7s)
-  as?: 'h1' | 'h2' | 'h3' | 'p' | 'span'
+  delay?: number
+  stagger?: number
+  duration?: number
+  as?: 'h1' | 'h2' | 'h3' | 'p' | 'div'
 }
 
 export function SplitText({
   children,
   className,
   delay = 0,
-  stagger = 0.04,
-  duration = 0.7,
+  stagger = 0.05,
+  duration = 0.75,
   as: Tag = 'h2',
 }: SplitTextProps) {
   const reduced = useReducedMotion()
@@ -44,33 +38,46 @@ export function SplitText({
     return <Tag className={className}>{children}</Tag>
   }
 
+  const container: Variants = {
+    hidden:  {},
+    visible: {
+      transition: {
+        delayChildren:   delay,
+        staggerChildren: stagger,
+      },
+    },
+  }
+
+  const child: Variants = {
+    hidden:  { y: 14, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration, ease: EASE },
+    },
+  }
+
+  const MotionTag = motion[Tag]
+
   return (
-    <Tag
+    <MotionTag
       className={className}
-      style={{ display: 'flex', flexWrap: 'wrap', gap: '0 0.28em' }}
       aria-label={children}
+      variants={container}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.1 }}
     >
       {words.map((word, i) => (
-        <span
+        <motion.span
           key={`${word}-${i}`}
-          style={{ display: 'inline-block', overflow: 'hidden', lineHeight: 'inherit' }}
           aria-hidden="true"
+          style={{ display: 'inline-block', marginRight: '0.28em' }}
+          variants={child}
         >
-          <motion.span
-            style={{ display: 'inline-block' }}
-            initial={{ y: '105%', opacity: 0 }}
-            whileInView={{ y: '0%', opacity: 1 }}
-            viewport={{ once: true, margin: '-40px' }}
-            transition={{
-              duration,
-              ease: CINEMATIC_EASE,
-              delay: delay + i * stagger,
-            }}
-          >
-            {word}
-          </motion.span>
-        </span>
+          {word}
+        </motion.span>
       ))}
-    </Tag>
+    </MotionTag>
   )
 }
