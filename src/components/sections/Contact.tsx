@@ -72,23 +72,25 @@ function EarthMoon() {
       const h = canvas.height
       ctx.clearRect(0, 0, w, h)
 
-      // Tierra anclada a la esquina inferior-derecha — parcialmente fuera de cuadro.
-      // Lectura: planeta asomando al borde, no pelota centrada.
-      const ER = Math.min(w, h) * (w < 768 ? 0.42 : 0.36)
-      const cx = w + ER * 0.18   // centro fuera del viewport por la derecha
-      const cy = h + ER * 0.10   // centro fuera por abajo
+      // Tierra en esquina inferior-derecha: el centro está justo en la esquina
+      // del viewport — se ve exactamente un cuarto de la esfera.
+      const ER = Math.min(w, h) * (w < 768 ? 0.55 : 0.48)
+      const cx = w   // centro en el borde derecho
+      const cy = h   // centro en el borde inferior
       const rotation = elapsed * 0.032  // rotación de la Tierra (~3.2% por segundo)
 
       // ── LUNA ─────────────────────────────────────────────────
       // Órbita alrededor de la Tierra (ahora en la esquina). Mantenemos
       // la luna cercana para que respire en el frame sin invadir el texto.
-      const moonOrbitRX = ER * 1.55
-      const moonOrbitRY = ER * 0.62  // órbita inclinada, más plana
+      // Órbita hacia el interior del canvas (arriba-izquierda desde la esquina)
+      const moonOrbitRX = ER * 1.10
+      const moonOrbitRY = ER * 0.45
       const moonT       = elapsed * 0.085
-      const moonR       = ER * 0.22
-      const moonX = cx + Math.cos(moonT) * moonOrbitRX
-      const moonY = cy + Math.sin(moonT) * moonOrbitRY
-      const moonBehind = Math.sin(moonT) < 0  // detrás de la Tierra
+      const moonR       = ER * 0.18
+      // Órbita desplazada hacia arriba-izquierda para que entre en el frame
+      const moonX = cx + Math.cos(moonT) * moonOrbitRX - ER * 0.55
+      const moonY = cy + Math.sin(moonT) * moonOrbitRY - ER * 0.55
+      const moonBehind = Math.sin(moonT) < 0
 
       const drawMoon = () => {
         ctx.save()
