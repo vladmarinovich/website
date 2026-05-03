@@ -73,7 +73,7 @@ function PortalEcho() {
 
   return (
     <div
-      className="relative h-[200px] md:h-[260px] flex items-center justify-center pointer-events-none overflow-hidden"
+      className="relative z-10 h-[200px] md:h-[260px] flex items-center justify-center pointer-events-none overflow-hidden"
       aria-hidden="true"
     >
       {/* 3 anillos emanando — animación GPU (transform/opacity solamente) */}
@@ -110,24 +110,24 @@ function PortalEcho() {
 /* ── Footer ──────────────────────────────────────────────── */
 export default function Footer() {
   return (
-    <footer className="relative z-10 bg-background overflow-hidden">
+    <footer className="relative z-10 overflow-hidden" style={{ background: '#05070B' }}>
 
       {/* Imagen de fondo — salida del portal, atmósfera tenue */}
-      <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
         <picture>
           <source media="(min-width: 768px)" srcSet="/assets/images/footer-desktop.webp" type="image/webp" />
           <img
             src="/assets/images/footer-mobile.webp"
             alt=""
             draggable={false}
-            className="w-full h-full object-cover object-center select-none"
-            style={{ opacity: 0.14, filter: 'blur(6px)', transform: 'scale(1.04)' }}
+            className="w-full h-full object-cover object-top select-none"
+            style={{ opacity: 0.22, filter: 'blur(4px)', transform: 'scale(1.04)' }}
           />
         </picture>
-        {/* Fade desde el negro del Contact + fade al negro al final */}
+        {/* Fade superior desde el negro + viñeta inferior */}
         <div
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(to bottom, #05070B 0%, transparent 20%, transparent 80%, #05070B 100%)' }}
+          style={{ background: 'linear-gradient(to bottom, #05070B 0%, transparent 30%, transparent 70%, #05070B 100%)' }}
         />
       </div>
 
@@ -135,7 +135,7 @@ export default function Footer() {
       <PortalEcho />
 
       {/* Email gigante — el ancla visual del footer */}
-      <div className="relative px-6 md:px-12 pt-4 pb-16 md:pb-20">
+      <div className="relative z-10 px-6 md:px-12 pt-4 pb-16 md:pb-20">
         <div className="max-w-7xl mx-auto">
           <p className="font-mono text-[10px] tracking-[0.34em] text-accent-cyan/55 uppercase mb-6">
             (·) Línea directa
@@ -164,7 +164,7 @@ export default function Footer() {
       </div>
 
       {/* Manifesto line — una frase con peso */}
-      <div className="relative px-6 md:px-12 py-12 md:py-16 border-t border-white/[0.06]">
+      <div className="relative z-10 px-6 md:px-12 py-12 md:py-16 border-t border-white/[0.06]">
         <div className="max-w-7xl mx-auto">
           <p className="text-textPrimary/80 text-2xl md:text-3xl lg:text-4xl font-semibold leading-[1.15] tracking-[-0.02em] max-w-3xl">
             Diseñado, construido y operado por una sola mente.
@@ -174,7 +174,7 @@ export default function Footer() {
       </div>
 
       {/* Zonas lettered — taxonomía editorial */}
-      <div className="relative px-6 md:px-12 py-14 md:py-16 border-t border-white/[0.06]">
+      <div className="relative z-10 px-6 md:px-12 py-14 md:py-16 border-t border-white/[0.06]">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
           {ZONES.map((zone) => (
             <div key={zone.letter}>
@@ -211,7 +211,7 @@ export default function Footer() {
       </div>
 
       {/* Línea de cierre — legal precision */}
-      <div className="relative px-6 md:px-12 py-8 border-t border-white/[0.06]">
+      <div className="relative z-10 px-6 md:px-12 py-8 border-t border-white/[0.06]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
 
           {/* Sello — wordmark */}
