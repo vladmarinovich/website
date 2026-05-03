@@ -41,7 +41,7 @@ export default function Capabilities() {
             <SectionEyebrow num="(02)" label={c.eyebrow} colorClass="text-accent-purple" />
           </FadeUp>
           <FadeUp kind="title" delay={0.08}>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-textPrimary leading-[1.04] tracking-[-0.02em] mb-8">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-textPrimary leading-[1.04] tracking-[-0.02em] mb-8">
               {c.title}
             </h2>
           </FadeUp>
@@ -61,7 +61,7 @@ export default function Capabilities() {
                   group
                   grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12
                   border-t border-white/[0.07]
-                  py-12 md:py-16
+                  py-14 md:py-20
                   transition-colors duration-500
                   hover:border-accent-purple/30
                 "
@@ -78,10 +78,10 @@ export default function Capabilities() {
 
                 {/* Columna derecha: contenido editorial */}
                 <div className="md:col-span-9 max-w-2xl">
-                  <h3 className="text-2xl md:text-3xl lg:text-[2.2rem] font-semibold text-textPrimary leading-[1.15] tracking-[-0.015em] mb-5">
+                  <h3 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-textPrimary leading-[1.15] tracking-[-0.015em] mb-5">
                     {item.title}
                   </h3>
-                  <p className="text-textSecondary text-base md:text-lg leading-[1.65]">
+                  <p className="text-textSecondary text-lg md:text-xl leading-[1.65]">
                     {item.body}
                   </p>
                 </div>
