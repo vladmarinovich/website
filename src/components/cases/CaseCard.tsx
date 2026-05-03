@@ -20,15 +20,18 @@ export function CaseCard({ caseStudy: c, onClick, index }: CaseCardProps) {
   return (
     <motion.button
       onClick={onClick}
-      className="group relative text-left w-full border border-white/[0.07] bg-surface/60 rounded-sm overflow-hidden hover:border-white/[0.16] transition-colors duration-400 cursor-pointer"
+      className="group relative text-left w-full border border-white/[0.07] bg-surface/60 rounded-sm overflow-hidden hover:border-accent-cyan/25 hover:shadow-[0_0_24px_rgba(99,215,255,0.06)] transition-all duration-500 cursor-pointer"
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.65, ease: [0.25, 0.4, 0.25, 1], delay: index * 0.1 }}
-      whileHover={{ y: -6 }}
     >
       {/* Thumbnail */}
       <div className="relative overflow-hidden aspect-[16/9] bg-surfaceSoft">
+        {/* Número de caso — top left */}
+        <span className="absolute top-4 left-4 z-10 font-mono text-[10px] tracking-[0.28em] text-textSecondary/55 uppercase">
+          CASO {String(index + 1).padStart(2, '0')}
+        </span>
         <img
           src={c.assets[0].src}
           alt={c.assets[0].alt}
