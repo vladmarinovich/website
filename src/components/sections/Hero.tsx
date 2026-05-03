@@ -38,8 +38,13 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative h-screen flex items-end pb-24 md:pb-28 px-6 md:px-12"
+      className="relative h-screen flex items-end pb-28 md:pb-36 px-6 md:px-12"
     >
+      {/* Gradiente de legibilidad — detrás del copy block */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true"
+        style={{ background: 'linear-gradient(to top, rgba(5,7,11,0.85) 0%, rgba(5,7,11,0.4) 45%, transparent 100%)' }}
+      />
+
       {/* Copy principal — fondo inferior izquierdo */}
       <motion.div
         className="relative z-10 max-w-7xl mx-auto w-full"
@@ -48,8 +53,8 @@ export default function Hero() {
         {/* Eyebrow lettered */}
         <FadeUp kind="eyebrow" delay={0.05}>
           <p className="font-mono text-xs md:text-sm tracking-[0.32em] uppercase mb-8 flex items-center gap-3">
-            <span className="text-accent-cyan opacity-45">(00)</span>
-            <span className="text-accent-cyan opacity-90">{siteCopy.hero.eyebrow}</span>
+            <span className="text-accent-cyan opacity-50">(00)</span>
+            <span className="text-accent-cyan opacity-100">{siteCopy.hero.eyebrow}</span>
           </p>
         </FadeUp>
 
@@ -57,7 +62,7 @@ export default function Hero() {
             "El problema no es lo que falta." → primera línea.
             "Es lo que no está conectado."    → segunda línea (golpe). */}
         <FadeUp kind="title" delay={0.18}>
-          <h1 className="text-textPrimary font-semibold leading-[1.04] tracking-[-0.025em] max-w-5xl mb-8 text-4xl md:text-6xl lg:text-7xl">
+          <h1 className="text-textPrimary font-semibold leading-[0.96] tracking-[-0.035em] max-w-5xl mb-8 text-5xl md:text-[5.5rem] lg:text-[8rem]">
             El problema no es lo que falta.
             <br />
             Es lo que no está conectado.
@@ -66,7 +71,7 @@ export default function Hero() {
 
         {/* Supporting — horizonte de tiempo */}
         <FadeUp kind="body" delay={0.42}>
-          <p className="text-textSecondary/90 text-lg md:text-xl max-w-2xl leading-[1.55] mb-12">
+          <p className="text-textSecondary/90 text-xl md:text-2xl max-w-2xl leading-[1.55] mb-12">
             {siteCopy.hero.supporting}
           </p>
         </FadeUp>
