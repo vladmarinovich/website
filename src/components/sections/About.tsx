@@ -19,6 +19,7 @@ import { siteCopy } from '@/content/siteCopy'
 import { useSectionOpacity } from '@/hooks/useSectionOpacity'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { FadeUp } from '@/components/ui/FadeUp'
+import { SectionEyebrow } from '@/components/ui/SectionEyebrow'
 
 export default function About() {
   const ref      = useRef<HTMLElement>(null)
@@ -43,9 +44,7 @@ export default function About() {
       <div className="max-w-7xl mx-auto">
 
         <FadeUp kind="eyebrow">
-          <p className="font-mono text-xs md:text-sm tracking-[0.28em] text-accent-orange mb-6 uppercase">
-            {c.eyebrow}
-          </p>
+          <SectionEyebrow num="(04)" label={c.eyebrow} colorClass="text-accent-orange" />
         </FadeUp>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
