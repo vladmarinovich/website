@@ -16,8 +16,6 @@
  * Todo construido con código. Cero imágenes adicionales.
  */
 
-import { useReducedMotion } from '@/hooks/useReducedMotion'
-
 const EMAIL = 'consultor@vladmarinovich.com'
 
 const ZONES = [
@@ -59,68 +57,21 @@ const ZONES = [
   },
 ]
 
-/* ── Portal echo — anillos CSS concéntricos respirando ────── */
-function PortalEcho() {
-  const reduced = useReducedMotion()
-
-  if (reduced) {
-    return (
-      <div className="relative h-[180px] flex items-center justify-center pointer-events-none">
-        <div className="w-[300px] h-[300px] rounded-full border border-accent-cyan/15" />
-      </div>
-    )
-  }
-
-  return (
-    <div
-      className="relative z-10 h-[200px] md:h-[260px] flex items-center justify-center pointer-events-none overflow-hidden"
-      aria-hidden="true"
-    >
-      {/* 3 anillos emanando — animación GPU (transform/opacity solamente) */}
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="absolute top-1/2 left-1/2 w-[60px] h-[60px] rounded-full border border-accent-cyan/30 will-change-transform"
-          style={{
-            animation: `portalEmanate 12s linear infinite`,
-            animationDelay: `${-i * 4}s`,
-          }}
-        />
-      ))}
-
-      {/* Punto central — el origen del portal */}
-      <span className="relative w-1.5 h-1.5 rounded-full bg-accent-cyan/70 will-change-transform [animation:portalPulse_4s_ease-in-out_infinite]" />
-
-      <style>{`
-        @keyframes portalEmanate {
-          0%   { transform: translate(-50%, -50%) scale(0.5);  opacity: 0; }
-          10%  { opacity: 0.7; }
-          70%  { opacity: 0.15; }
-          100% { transform: translate(-50%, -50%) scale(15);   opacity: 0; }
-        }
-        @keyframes portalPulse {
-          0%, 100% { opacity: 0.6; }
-          50%      { opacity: 1; }
-        }
-      `}</style>
-    </div>
-  )
-}
-
 /* ── Footer ──────────────────────────────────────────────── */
 export default function Footer() {
   return (
     <footer className="relative z-10 overflow-hidden" style={{ background: '#05070B' }}>
 
-      {/* Portal echo — el corredor sigue abierto */}
-      <PortalEcho />
+      {/* Separador de apertura — línea sutil + punto */}
+      <div className="relative z-10 px-6 md:px-12 pt-20 md:pt-28 pb-10 flex items-center gap-4">
+        <div className="h-px bg-white/[0.08] flex-1" />
+        <span className="font-mono text-[10px] tracking-[0.32em] text-textSecondary/30 uppercase">vladmarinovich.com</span>
+        <div className="h-px bg-white/[0.08] flex-1" />
+      </div>
 
       {/* Email gigante — el ancla visual del footer */}
       <div className="relative z-10 px-6 md:px-12 pt-4 pb-16 md:pb-20">
         <div className="max-w-7xl mx-auto">
-          <p className="font-mono text-[10px] tracking-[0.34em] text-accent-cyan/55 uppercase mb-6">
-            (·) Línea directa
-          </p>
 
           <a
             href={`mailto:${EMAIL}`}
@@ -147,7 +98,7 @@ export default function Footer() {
       {/* Manifesto line — una frase con peso */}
       <div className="relative z-10 px-6 md:px-12 py-12 md:py-16 border-t border-white/[0.06]">
         <div className="max-w-7xl mx-auto">
-          <p className="text-textPrimary/80 text-2xl md:text-3xl lg:text-4xl font-semibold leading-[1.15] tracking-[-0.02em] max-w-3xl">
+          <p className="text-textPrimary/80 text-3xl md:text-4xl lg:text-5xl font-semibold leading-[1.1] tracking-[-0.02em] max-w-3xl">
             Diseñado, construido y operado por una sola mente.
             <span className="text-textSecondary/40"> Sin equipo. Sin agencia. Sin máscara.</span>
           </p>
@@ -197,7 +148,7 @@ export default function Footer() {
 
           {/* Sello — wordmark */}
           <p className="font-mono text-[10px] tracking-[0.32em] text-textSecondary/45 uppercase">
-            VLADMARINOVICH.COM <span className="text-textSecondary/25 mx-2">·</span> 2026
+            © 2026 Vladislav Marinovich <span className="text-textSecondary/25 mx-2">·</span> VLADMARINOVICH.COM
           </p>
 
           {/* Tech stack — colofón corto */}
