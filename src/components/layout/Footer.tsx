@@ -1,50 +1,232 @@
 /**
- * Footer — barra de cierre de la página.
+ * Footer — la salida del portal.
  *
- * Mínima: marca a la izquierda, links sociales a la derecha.
- * Fondo semi-transparente sobre el negro del documento.
+ * Después del blanco del Contact, el sitio vuelve al negro y el corredor
+ * cuántico re-aparece como ECO en el footer: anillos concéntricos
+ * respirando hacia afuera. El portal nunca cerró del todo.
+ *
+ * Estructura editorial estilo Made in Evolve:
+ *  - portal echo (anillos CSS animados)
+ *  - email gigante como ancla visual (no astronautas — la dirección
+ *    misma es el sello de presencia)
+ *  - manifesto line — una sola frase con peso
+ *  - lettered taxonomy: (a.) (b.) (c.) (d.)
+ *  - legal precision
+ *
+ * Todo construido con código. Cero imágenes adicionales.
  */
 
-import { siteCopy } from '@/content/siteCopy'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
-const SOCIALS = [
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/vladmarinovich' },
-  { label: 'GitHub',   href: 'https://github.com/vladmarinovich'      },
+const EMAIL = 'consultor@vladmarinovich.com'
+
+const ZONES = [
+  {
+    letter: 'a',
+    label:  'Contacto directo',
+    items:  [
+      { label: 'Escribir',     href: `mailto:${EMAIL}`                },
+      { label: 'WhatsApp',     href: 'https://wa.link/ohnau7'          },
+      { label: 'Agendar',      href: 'https://cal.com/vladmarinovich'  },
+    ],
+  },
+  {
+    letter: 'b',
+    label:  'Ruta del sitio',
+    items:  [
+      { label: 'Trabajo',  href: '#evidence'      },
+      { label: 'Criterio', href: '#thinking'      },
+      { label: 'Sobre mí', href: '#about'         },
+      { label: 'Estándar', href: '#standards'     },
+    ],
+  },
+  {
+    letter: 'c',
+    label:  'Presencia',
+    items:  [
+      { label: 'LinkedIn', href: 'https://linkedin.com/in/vladmarinovich' },
+      { label: 'GitHub',   href: 'https://github.com/vladmarinovich'      },
+    ],
+  },
+  {
+    letter: 'd',
+    label:  'Sistema',
+    items:  [
+      { label: 'Versión 1.0',           href: undefined },
+      { label: 'Bogotá · Colombia',     href: undefined },
+      { label: 'Operativo desde 2026',  href: undefined },
+    ],
+  },
 ]
 
-export default function Footer() {
-  const f = siteCopy.footer
+/* ── Portal echo — anillos CSS concéntricos respirando ────── */
+function PortalEcho() {
+  const reduced = useReducedMotion()
+
+  if (reduced) {
+    return (
+      <div className="relative h-[180px] flex items-center justify-center pointer-events-none">
+        <div className="w-[300px] h-[300px] rounded-full border border-accent-cyan/15" />
+      </div>
+    )
+  }
 
   return (
-    <footer className="relative z-10 border-t border-white/[0.07] bg-background/80 backdrop-blur-sm px-6 md:px-12 py-6">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div
+      className="relative h-[200px] md:h-[260px] flex items-center justify-center pointer-events-none overflow-hidden"
+      aria-hidden="true"
+    >
+      {/* 3 anillos emanando — animación GPU (transform/opacity solamente) */}
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="absolute top-1/2 left-1/2 w-[60px] h-[60px] rounded-full border border-accent-cyan/30 will-change-transform"
+          style={{
+            animation: `portalEmanate 12s linear infinite`,
+            animationDelay: `${-i * 4}s`,
+          }}
+        />
+      ))}
 
-        {/* Marca */}
-        <p className="font-mono text-xs tracking-[0.22em] text-textSecondary/40 uppercase">
-          {f.brand}
-        </p>
+      {/* Punto central — el origen del portal */}
+      <span className="relative w-1.5 h-1.5 rounded-full bg-accent-cyan/70 will-change-transform [animation:portalPulse_4s_ease-in-out_infinite]" />
 
-        {/* Nota central (desktop) */}
-        <p className="hidden md:block font-mono text-[10px] tracking-[0.16em] text-textSecondary/25 uppercase text-center">
-          {f.note}
-        </p>
+      <style>{`
+        @keyframes portalEmanate {
+          0%   { transform: translate(-50%, -50%) scale(0.5);  opacity: 0; }
+          10%  { opacity: 0.7; }
+          70%  { opacity: 0.15; }
+          100% { transform: translate(-50%, -50%) scale(15);   opacity: 0; }
+        }
+        @keyframes portalPulse {
+          0%, 100% { opacity: 0.6; }
+          50%      { opacity: 1; }
+        }
+      `}</style>
+    </div>
+  )
+}
 
-        {/* Links sociales */}
-        <div className="flex items-center gap-6">
-          {SOCIALS.map((s) => (
-            <a
-              key={s.label}
-              href={s.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono text-xs tracking-[0.18em] text-textSecondary/40 hover:text-textSecondary transition-colors uppercase"
+/* ── Footer ──────────────────────────────────────────────── */
+export default function Footer() {
+  return (
+    <footer className="relative z-10 bg-background overflow-hidden">
+
+      {/* Imagen de fondo — salida del portal, atmósfera tenue */}
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+        <picture>
+          <source media="(min-width: 768px)" srcSet="/assets/images/footer-desktop.webp" type="image/webp" />
+          <img
+            src="/assets/images/footer-mobile.webp"
+            alt=""
+            draggable={false}
+            className="w-full h-full object-cover object-center select-none"
+            style={{ opacity: 0.14, filter: 'blur(6px)', transform: 'scale(1.04)' }}
+          />
+        </picture>
+        {/* Fade desde el negro del Contact + fade al negro al final */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(to bottom, #05070B 0%, transparent 20%, transparent 80%, #05070B 100%)' }}
+        />
+      </div>
+
+      {/* Portal echo — el corredor sigue abierto */}
+      <PortalEcho />
+
+      {/* Email gigante — el ancla visual del footer */}
+      <div className="relative px-6 md:px-12 pt-4 pb-16 md:pb-20">
+        <div className="max-w-7xl mx-auto">
+          <p className="font-mono text-[10px] tracking-[0.34em] text-accent-cyan/55 uppercase mb-6">
+            (·) Línea directa
+          </p>
+
+          <a
+            href={`mailto:${EMAIL}`}
+            className="
+              group block
+              text-textPrimary font-semibold leading-[0.9] tracking-[-0.04em]
+              text-[2.2rem] sm:text-[3rem] md:text-[5rem] lg:text-[6.5rem] xl:text-[7.5rem]
+              break-words
+              transition-colors duration-500
+              hover:text-accent-cyan
+            "
+          >
+            {EMAIL}
+            <span
+              aria-hidden="true"
+              className="inline-block ml-3 md:ml-6 align-middle text-textSecondary/30 group-hover:text-accent-cyan/80 group-hover:translate-x-2 transition-all duration-500"
             >
-              {s.label}
-            </a>
+              ↗
+            </span>
+          </a>
+        </div>
+      </div>
+
+      {/* Manifesto line — una frase con peso */}
+      <div className="relative px-6 md:px-12 py-12 md:py-16 border-t border-white/[0.06]">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-textPrimary/80 text-2xl md:text-3xl lg:text-4xl font-semibold leading-[1.15] tracking-[-0.02em] max-w-3xl">
+            Diseñado, construido y operado por una sola mente.
+            <span className="text-textSecondary/40"> Sin equipo. Sin agencia. Sin máscara.</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Zonas lettered — taxonomía editorial */}
+      <div className="relative px-6 md:px-12 py-14 md:py-16 border-t border-white/[0.06]">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12">
+          {ZONES.map((zone) => (
+            <div key={zone.letter}>
+              {/* Letra + label */}
+              <p className="font-mono text-[10px] tracking-[0.32em] text-textSecondary/40 uppercase mb-5">
+                <span className="text-accent-cyan/70">({zone.letter}.)</span>{' '}
+                {zone.label}
+              </p>
+
+              {/* Items */}
+              <ul className="space-y-2">
+                {zone.items.map((item) => (
+                  <li key={item.label}>
+                    {item.href ? (
+                      <a
+                        href={item.href}
+                        target={item.href.startsWith('http') || item.href.startsWith('mailto') ? '_blank' : undefined}
+                        rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        className="font-mono text-xs tracking-wide text-textSecondary/70 hover:text-textPrimary transition-colors"
+                      >
+                        {item.label}
+                      </a>
+                    ) : (
+                      <span className="font-mono text-xs tracking-wide text-textSecondary/40">
+                        {item.label}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
         </div>
-
       </div>
+
+      {/* Línea de cierre — legal precision */}
+      <div className="relative px-6 md:px-12 py-8 border-t border-white/[0.06]">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+
+          {/* Sello — wordmark */}
+          <p className="font-mono text-[10px] tracking-[0.32em] text-textSecondary/45 uppercase">
+            VLADMARINOVICH.COM <span className="text-textSecondary/25 mx-2">·</span> 2026
+          </p>
+
+          {/* Tech stack — colofón corto */}
+          <p className="font-mono text-[10px] tracking-[0.18em] text-textSecondary/30 uppercase text-left md:text-right">
+            Geist · Three.js r184 · React · Operado en silencio.
+          </p>
+
+        </div>
+      </div>
+
     </footer>
   )
 }
