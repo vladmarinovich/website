@@ -18,19 +18,19 @@ export default function Standards() {
   const c = siteCopy.standards
 
   return (
-    <motion.section id="standards" ref={ref} className="relative min-h-screen py-32 px-6 md:px-12" style={{ opacity }}>
+    <motion.section id="standards" ref={ref} className="relative min-h-screen py-36 md:py-48 px-6 md:px-12" style={{ opacity }}>
       <div className="max-w-7xl mx-auto">
 
         <FadeUp kind="eyebrow">
           <SectionEyebrow num="(05)" label={c.eyebrow} colorClass="text-textSecondary" />
         </FadeUp>
         <FadeUp kind="title" delay={0.08}>
-          <h2 className="text-4xl md:text-6xl font-semibold text-textPrimary leading-[1.02] tracking-[-0.02em] mb-6 max-w-4xl">
+          <h2 className="text-4xl md:text-5xl lg:text-7xl font-semibold text-textPrimary leading-[1.02] tracking-[-0.02em] mb-6 max-w-4xl">
             {c.title}
           </h2>
         </FadeUp>
         <FadeUp kind="body" delay={0.22}>
-          <p className="text-textSecondary text-lg md:text-xl max-w-2xl leading-[1.6] mb-16">
+          <p className="text-textSecondary text-lg md:text-xl max-w-2xl leading-[1.6] mb-20">
             {c.body}
           </p>
         </FadeUp>
@@ -57,7 +57,7 @@ export default function Standards() {
               {c.yesItems.map((item, i) => (
                 <li key={i} className="flex items-start gap-4 text-textSecondary">
                   <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-accent-cyan shrink-0" />
-                  <span className="text-lg leading-[1.55]">{item}</span>
+                  <span className="text-lg md:text-xl leading-[1.55]">{item}</span>
                 </li>
               ))}
             </ul>
@@ -76,7 +76,7 @@ export default function Standards() {
               {c.noItems.map((item, i) => (
                 <li key={i} className="flex items-start gap-4 text-textSecondary/75">
                   <span className="mt-2.5 w-1.5 h-1.5 rounded-full bg-white/25 shrink-0" />
-                  <span className="text-lg leading-[1.55]">{item}</span>
+                  <span className="text-lg md:text-xl leading-[1.55]">{item}</span>
                 </li>
               ))}
             </ul>
