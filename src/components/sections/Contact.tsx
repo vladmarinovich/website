@@ -318,30 +318,36 @@ export default function Contact() {
         {/* Tierra + Luna — fondo espacial de cierre */}
         <EarthMoon />
 
-        {/* Atmósfera: imagen al fondo con blur, opacity baja — NO crece, NO domina */}
-        <motion.div
+        {/* Cierre del túnel — imagen full-bleed, protagonista */}
+        <div
           className="absolute inset-0 pointer-events-none"
-          style={{
-            opacity: reduced ? 0.10 : atmoOpacity,
-            filter: 'blur(20px)',
-            transform: 'scale(1.05)',
-          }}
           aria-hidden="true"
         >
           <picture>
-            <source
-              media="(min-width: 768px)"
-              srcSet="/assets/images/footer-desktop.webp"
-              type="image/webp"
-            />
+            <source media="(min-width: 768px)" srcSet="/assets/images/footer-desktop.webp" type="image/webp" />
             <img
               src="/assets/images/footer-mobile.webp"
               alt=""
               draggable={false}
               className="w-full h-full object-cover object-center select-none"
+              style={{ opacity: 0.55 }}
             />
           </picture>
-        </motion.div>
+          {/* Vignette: oscurece bordes, deja el centro del túnel respirar */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'radial-gradient(ellipse 65% 65% at 50% 50%, transparent 0%, rgba(5,7,11,0.72) 100%)',
+            }}
+          />
+          {/* Gradiente inferior — fade al negro para que el texto flote */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(to top, #05070B 0%, transparent 45%)',
+            }}
+          />
+        </div>
 
         {/* Vignette radial sutil para anclar el centro */}
         <div

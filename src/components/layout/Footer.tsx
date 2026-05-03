@@ -112,25 +112,6 @@ export default function Footer() {
   return (
     <footer className="relative z-10 overflow-hidden" style={{ background: '#05070B' }}>
 
-      {/* Imagen de fondo — salida del portal, atmósfera tenue */}
-      <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
-        <picture>
-          <source media="(min-width: 768px)" srcSet="/assets/images/footer-desktop.webp" type="image/webp" />
-          <img
-            src="/assets/images/footer-mobile.webp"
-            alt=""
-            draggable={false}
-            className="w-full h-full object-cover object-top select-none"
-            style={{ opacity: 0.22, filter: 'blur(4px)', transform: 'scale(1.04)' }}
-          />
-        </picture>
-        {/* Fade superior desde el negro + viñeta inferior */}
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(to bottom, #05070B 0%, transparent 30%, transparent 70%, #05070B 100%)' }}
-        />
-      </div>
-
       {/* Portal echo — el corredor sigue abierto */}
       <PortalEcho />
 
