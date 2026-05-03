@@ -308,7 +308,7 @@ function EvidenceFallback({ openCase }: { openCase: (id: string) => void }) {
   return (
     <section
       id="evidence"
-      className="relative min-h-screen py-32 px-6 md:px-12"
+      className="relative min-h-screen py-36 md:py-48 px-6 md:px-12"
     >
       <div className="max-w-7xl mx-auto">
         <motion.div
@@ -325,7 +325,7 @@ function EvidenceFallback({ openCase }: { openCase: (id: string) => void }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.65, ease: EASE, delay: 0.08 }}
-          className="text-4xl md:text-5xl font-semibold text-textPrimary leading-[1.02] tracking-[-0.02em] mb-6"
+          className="text-4xl md:text-6xl lg:text-7xl font-semibold text-textPrimary leading-[1.02] tracking-[-0.02em] mb-6"
         >
           {c.title}
         </motion.h2>
@@ -335,12 +335,12 @@ function EvidenceFallback({ openCase }: { openCase: (id: string) => void }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.65, ease: EASE, delay: 0.18 }}
-          className="text-textSecondary text-lg md:text-xl max-w-2xl leading-[1.6]"
+          className="text-textSecondary text-lg md:text-xl max-w-2xl leading-[1.6] mb-0"
         >
           {c.body}
         </motion.p>
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {cases.map((caseStudy, i) => (
             <CaseCard
               key={caseStudy.id}
