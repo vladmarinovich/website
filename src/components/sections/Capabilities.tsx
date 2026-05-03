@@ -1,13 +1,15 @@
 /**
- * Sección Capabilities — capas de intervención.
+ * Sección Capabilities — territorios de intervención.
  *
- * Muestra cuatro áreas de trabajo en una grilla 2×2.
- * Usa separadores de 1px (gap-px sobre bg-white/6) en lugar
- * de bordes individuales — resulta en líneas más limpias.
+ * Reemplaza la grilla 2×2 ("lista de servicios") por una secuencia
+ * editorial vertical estilo archivo museístico: cada capacidad
+ * vive en su propio "campo" con eyebrow lettered (a./b./c./d.),
+ * título grande, body de párrafo largo con whitespace generoso.
  *
- * Color de acento: purple (sincronizado con sceneStore.colorMode)
+ * Brief: Vladislav como partner sistémico, no ejecutor táctico.
+ *        Editorial. Menos efectista. Más dominio.
  *
- * Legibilidad: body text a text-xl, items de grilla a text-base.
+ * Color de acento: purple (sceneStore.colorMode = "purple").
  */
 
 import { useRef } from 'react'
@@ -15,42 +17,80 @@ import { motion } from 'framer-motion'
 import { siteCopy } from '@/content/siteCopy'
 import { useSectionOpacity } from '@/hooks/useSectionOpacity'
 import { FadeUp } from '@/components/ui/FadeUp'
+import { SectionEyebrow } from '@/components/ui/SectionEyebrow'
+
+const LETTERS = ['a', 'b', 'c', 'd']
 
 export default function Capabilities() {
-  const ref     = useRef<HTMLElement>(null)
+  const ref      = useRef<HTMLElement>(null)
   const opacity  = useSectionOpacity(ref)
   const c = siteCopy.capabilities
 
   return (
-    <motion.section id="capabilities" ref={ref} className="relative min-h-screen py-32 px-6 md:px-12" style={{ opacity }}>
+    <motion.section
+      id="capabilities"
+      ref={ref}
+      className="relative min-h-screen py-32 md:py-40 px-6 md:px-12"
+      style={{ opacity }}
+    >
       <div className="max-w-7xl mx-auto">
 
-        <FadeUp kind="eyebrow">
-          <p className="font-mono text-xs md:text-sm tracking-[0.28em] text-accent-purple mb-6 uppercase">
-            {c.eyebrow}
-          </p>
-        </FadeUp>
-        <FadeUp kind="title" delay={0.08}>
-          <h2 className="text-4xl md:text-6xl font-semibold text-textPrimary leading-[1.02] tracking-[-0.02em] mb-6 max-w-4xl">
-            {c.title}
-          </h2>
-        </FadeUp>
-        <FadeUp kind="body" delay={0.22}>
-          <p className="text-textSecondary text-lg md:text-xl max-w-xl leading-[1.6] mb-16">
-            {c.body}
-          </p>
-        </FadeUp>
+        {/* Cabezal de sección */}
+        <div className="max-w-3xl mb-20 md:mb-28">
+          <FadeUp kind="eyebrow">
+            <SectionEyebrow num="(02)" label={c.eyebrow} colorClass="text-accent-purple" />
+          </FadeUp>
+          <FadeUp kind="title" delay={0.08}>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-textPrimary leading-[1.04] tracking-[-0.02em] mb-8">
+              {c.title}
+            </h2>
+          </FadeUp>
+          <FadeUp kind="body" delay={0.22}>
+            <p className="text-textSecondary text-lg md:text-xl leading-[1.6]">
+              {c.body}
+            </p>
+          </FadeUp>
+        </div>
 
-        {/* Grilla 2×2 — separadores de 1px */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/[0.06]">
+        {/* Territorios — secuencia editorial vertical */}
+        <div>
           {c.items.map((item, i) => (
-            <FadeUp key={i} kind="list" delay={i * 0.06} className="bg-background">
-              <div className="p-8">
-                <h3 className="text-textPrimary font-semibold text-lg mb-3 tracking-[-0.01em]">{item.title}</h3>
-                <p className="text-textSecondary text-base leading-[1.65]">{item.body}</p>
-              </div>
+            <FadeUp key={item.title} kind="list" delay={i * 0.06}>
+              <article
+                className="
+                  group
+                  grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-12
+                  border-t border-white/[0.07]
+                  py-12 md:py-16
+                  transition-colors duration-500
+                  hover:border-accent-purple/30
+                "
+              >
+                {/* Columna izquierda: lettered taxonomy */}
+                <div className="md:col-span-3">
+                  <p className="font-mono text-[11px] tracking-[0.32em] text-textSecondary/40 uppercase">
+                    <span className="text-accent-purple/70 group-hover:text-accent-purple transition-colors duration-500">
+                      ({LETTERS[i]}.)
+                    </span>
+                    <span className="ml-2">Territorio {String(i + 1).padStart(2, '0')}</span>
+                  </p>
+                </div>
+
+                {/* Columna derecha: contenido editorial */}
+                <div className="md:col-span-9 max-w-2xl">
+                  <h3 className="text-2xl md:text-3xl lg:text-[2.2rem] font-semibold text-textPrimary leading-[1.15] tracking-[-0.015em] mb-5">
+                    {item.title}
+                  </h3>
+                  <p className="text-textSecondary text-base md:text-lg leading-[1.65]">
+                    {item.body}
+                  </p>
+                </div>
+              </article>
             </FadeUp>
           ))}
+
+          {/* Línea de cierre del bloque */}
+          <div className="border-t border-white/[0.07]" />
         </div>
 
       </div>
