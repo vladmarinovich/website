@@ -1,0 +1,13 @@
+{
+  "name": "Vladislav Marinovich",
+  "short_name": "VladMar",
+  "description": "Arquitectura de ecosistemas digitales. Infraestructura que piensa.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#05070B",
+  "theme_color": "#05070B",
+  "icons": [
+    { "src": "/assets/images/logo-vlad.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "lang": "es-CO"
+}
