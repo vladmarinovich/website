@@ -20,14 +20,14 @@ export function CaseCard({ caseStudy: c, onClick, index }: CaseCardProps) {
   return (
     <motion.button
       onClick={onClick}
-      className="group relative text-left w-full border border-white/[0.07] bg-surface/60 rounded-sm overflow-hidden hover:border-accent-cyan/25 hover:shadow-[0_0_24px_rgba(99,215,255,0.06)] transition-all duration-500 cursor-pointer"
+      className="group relative text-left w-full border border-white/[0.09] bg-surface overflow-hidden hover:border-accent-cyan/25 hover:shadow-[0_0_40px_rgba(99,215,255,0.08)] transition-all duration-500 cursor-pointer"
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.65, ease: [0.25, 0.4, 0.25, 1], delay: index * 0.1 }}
     >
       {/* Thumbnail */}
-      <div className="relative overflow-hidden aspect-[16/9] bg-surfaceSoft">
+      <div className="relative overflow-hidden aspect-[16/10] bg-surfaceSoft">
         {/* Número de caso — top left */}
         <span className="absolute top-4 left-4 z-10 font-mono text-[10px] tracking-[0.28em] text-textSecondary/55 uppercase">
           CASO {String(index + 1).padStart(2, '0')}
@@ -49,7 +49,7 @@ export function CaseCard({ caseStudy: c, onClick, index }: CaseCardProps) {
           {c.eyebrow}
         </p>
 
-        <h3 className="text-2xl font-bold text-textPrimary leading-tight mb-2">
+        <h3 className="text-3xl font-semibold text-textPrimary leading-tight tracking-[-0.02em] mb-2">
           {c.title}
         </h3>
 
@@ -57,7 +57,7 @@ export function CaseCard({ caseStudy: c, onClick, index }: CaseCardProps) {
           {c.category}
         </p>
 
-        <p className="text-textSecondary text-sm leading-relaxed mb-8">
+        <p className="text-textSecondary text-base leading-relaxed mb-8">
           {c.summary}
         </p>
 
@@ -67,7 +67,7 @@ export function CaseCard({ caseStudy: c, onClick, index }: CaseCardProps) {
             {c.stack.slice(0, 3).map((tool) => (
               <span
                 key={tool}
-                className="font-mono text-[10px] text-textSecondary/40 border border-white/[0.06] px-2 py-0.5 rounded-sm tracking-wide"
+                className="font-mono text-[10px] text-textSecondary/55 border border-white/[0.1] px-2 py-0.5 rounded-sm tracking-wide"
               >
                 {tool}
               </span>
@@ -81,7 +81,7 @@ export function CaseCard({ caseStudy: c, onClick, index }: CaseCardProps) {
         )}
 
         {/* CTA inline */}
-        <div className="flex items-center gap-2 font-mono text-xs tracking-[0.18em] text-accent-cyan uppercase group-hover:gap-3 transition-all duration-300">
+        <div className="mt-auto flex items-center gap-2 font-mono text-xs tracking-[0.18em] text-accent-cyan uppercase group-hover:gap-3 transition-all duration-300">
           <span>Ver caso</span>
           <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
         </div>
