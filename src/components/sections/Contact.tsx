@@ -19,262 +19,12 @@
  *  - El resto: sticky dwell para dar peso al cierre
  */
 
-import { useRef, useEffect } from 'react'
+import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { siteCopy } from '@/content/siteCopy'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useUIStore } from '@/store/uiStore'
 import { SectionEyebrow } from '@/components/ui/SectionEyebrow'
-
-/* ── EarthMoon ───────────────────────────────────────────────
- * Canvas 2D: Tierra con rotación + terminator día/noche + Luna orbitando.
- * Se renderiza como fondo de la sección Contact.
- * Luz fija top-left, continentes mapeados en esfera, nube y casquetes polares.
- */
-function EarthMoon() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    let raf: number
-    const t0 = performance.now()
-
-    const resize = () => {
-      canvas.width  = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-    resize()
-    window.addEventListener('resize', resize)
-
-    // Continentes: [longitud, latitud, rx, ry] en fracciones de ER
-    // Posiciones aproximadas reales en la esfera
-    const CONTS = [
-      { lon:  0.40, lat:  0.50, rx: 0.28, ry: 0.20 },  // Europa / N.Africa
-      { lon:  0.65, lat: -0.05, rx: 0.22, ry: 0.32 },  // Africa central-sur
-      { lon:  1.35, lat:  0.38, rx: 0.38, ry: 0.28 },  // Asia
-      { lon:  1.92, lat: -0.38, rx: 0.18, ry: 0.14 },  // Australia
-      { lon: -1.25, lat:  0.40, rx: 0.22, ry: 0.30 },  // N. América
-      { lon: -1.45, lat: -0.28, rx: 0.16, ry: 0.24 },  // S. América
-    ]
-
-    // Luz top-left fija
-    const LX = -0.55  // componente x de la dirección de luz (negativo = viene desde izq)
-    const LY = -0.45  // componente y (negativo = viene desde arriba)
-
-    const draw = (now: number) => {
-      raf = requestAnimationFrame(draw)
-      const elapsed = (now - t0) / 1000
-      const w = canvas.width
-      const h = canvas.height
-      ctx.clearRect(0, 0, w, h)
-
-      // Tierra en esquina inferior-derecha: el centro está justo en la esquina
-      // del viewport — se ve exactamente un cuarto de la esfera.
-      const ER = Math.min(w, h) * (w < 768 ? 0.55 : 0.48)
-      const cx = w   // centro en el borde derecho
-      const cy = h   // centro en el borde inferior
-      const rotation = elapsed * 0.032  // rotación de la Tierra (~3.2% por segundo)
-
-      // ── LUNA ─────────────────────────────────────────────────
-      // Órbita alrededor de la Tierra (ahora en la esquina). Mantenemos
-      // la luna cercana para que respire en el frame sin invadir el texto.
-      // Órbita hacia el interior del canvas (arriba-izquierda desde la esquina)
-      const moonOrbitRX = ER * 1.10
-      const moonOrbitRY = ER * 0.45
-      const moonT       = elapsed * 0.085
-      const moonR       = ER * 0.18
-      // Órbita desplazada hacia arriba-izquierda para que entre en el frame
-      const moonX = cx + Math.cos(moonT) * moonOrbitRX - ER * 0.55
-      const moonY = cy + Math.sin(moonT) * moonOrbitRY - ER * 0.55
-      const moonBehind = Math.sin(moonT) < 0
-
-      const drawMoon = () => {
-        ctx.save()
-        // Glow tenue
-        const atmo = ctx.createRadialGradient(moonX, moonY, moonR * 0.85, moonX, moonY, moonR * 1.7)
-        atmo.addColorStop(0, 'rgba(205,205,215,0.07)')
-        atmo.addColorStop(1, 'rgba(0,0,0,0)')
-        ctx.fillStyle = atmo
-        ctx.beginPath(); ctx.arc(moonX, moonY, moonR * 1.7, 0, Math.PI * 2); ctx.fill()
-
-        // Superficie
-        const surf = ctx.createRadialGradient(
-          moonX + moonR * LX * 0.40, moonY + moonR * LY * 0.40, moonR * 0.04,
-          moonX, moonY, moonR
-        )
-        surf.addColorStop(0,    'rgba(212,212,218,0.93)')
-        surf.addColorStop(0.52, 'rgba(152,150,160,0.88)')
-        surf.addColorStop(1,    'rgba(22,20,32,0.86)')
-        ctx.beginPath(); ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2)
-        ctx.fillStyle = surf; ctx.fill()
-
-        // Cráteres
-        const craters: [number, number, number][] = [
-          [-0.24,-0.17,0.09],[0.27,0.23,0.06],[-0.34,0.27,0.05],[0.08,-0.32,0.07]
-        ]
-        for (const [ox,oy,r] of craters) {
-          ctx.beginPath()
-          ctx.arc(moonX + ox*moonR, moonY + oy*moonR, r*moonR, 0, Math.PI*2)
-          ctx.fillStyle = 'rgba(0,0,0,0.14)'; ctx.fill()
-        }
-        ctx.restore()
-      }
-
-      if (moonBehind) drawMoon()
-
-      // ── TIERRA ───────────────────────────────────────────────
-      ctx.save()
-
-      // Atmósfera exterior
-      const atmoR = ctx.createRadialGradient(cx, cy, ER * 0.92, cx, cy, ER * 1.58)
-      atmoR.addColorStop(0,   'rgba(60,125,215,0.30)')
-      atmoR.addColorStop(0.5, 'rgba(38,95,180,0.13)')
-      atmoR.addColorStop(1,   'rgba(18,55,145,0)')
-      ctx.beginPath(); ctx.arc(cx, cy, ER * 1.58, 0, Math.PI * 2)
-      ctx.fillStyle = atmoR; ctx.fill()
-
-      // Océanos
-      const ocean = ctx.createRadialGradient(
-        cx + ER * LX * 0.52, cy + ER * LY * 0.52, ER * 0.04,
-        cx, cy, ER
-      )
-      ocean.addColorStop(0,    'rgba(52,130,195,0.96)')
-      ocean.addColorStop(0.38, 'rgba(26,84,152,0.94)')
-      ocean.addColorStop(0.72, 'rgba(11,48,110,0.93)')
-      ocean.addColorStop(1,    'rgba(4,12,34,0.97)')
-      ctx.beginPath(); ctx.arc(cx, cy, ER, 0, Math.PI * 2)
-      ctx.fillStyle = ocean; ctx.fill()
-
-      // Continentes — clip al círculo
-      ctx.beginPath(); ctx.arc(cx, cy, ER, 0, Math.PI * 2); ctx.clip()
-
-      for (const c of CONTS) {
-        const lon = c.lon + rotation
-        // Proyección esférica simple
-        const xS =  Math.cos(c.lat) * Math.sin(lon)
-        const yS =  Math.sin(c.lat)
-        const zS =  Math.cos(c.lat) * Math.cos(lon)  // >0 = cara visible
-        if (zS < -0.12) continue
-        const alpha   = Math.max(0, Math.min(1, (zS + 0.12) / 0.40))
-        const scaleZ  = 0.45 + zS * 0.55  // compresión perspectiva
-        const screenX = cx + ER * xS
-        const screenY = cy - ER * yS * 0.94
-        ctx.save()
-        ctx.globalAlpha = alpha * 0.80
-        ctx.translate(screenX, screenY)
-        // Masa continental principal
-        ctx.beginPath()
-        ctx.ellipse(0, 0, c.rx * ER * scaleZ, c.ry * ER * 0.90, lon * 0.08, 0, Math.PI * 2)
-        ctx.fillStyle = 'rgba(52,98,48,0.85)'; ctx.fill()
-        // Acento árido (desierto / interior)
-        ctx.beginPath()
-        ctx.ellipse(c.rx*ER*0.22*scaleZ, c.ry*ER*0.10, c.rx*ER*0.40*scaleZ, c.ry*ER*0.32, 0.4, 0, Math.PI*2)
-        ctx.fillStyle = 'rgba(128,98,55,0.28)'; ctx.fill()
-        ctx.restore()
-      }
-
-      // Casquetes polares
-      const drawIce = (yOff: number, size: number) => {
-        const g = ctx.createRadialGradient(cx, cy + yOff*ER, 0, cx, cy + yOff*ER, size*ER)
-        g.addColorStop(0,    'rgba(218,232,255,0.90)')
-        g.addColorStop(0.55, 'rgba(198,218,255,0.45)')
-        g.addColorStop(1,    'rgba(178,208,255,0)')
-        ctx.save(); ctx.globalAlpha = 1
-        ctx.beginPath(); ctx.arc(cx, cy + yOff*ER, size*ER, 0, Math.PI*2)
-        ctx.fillStyle = g; ctx.fill(); ctx.restore()
-      }
-      drawIce(-0.80, 0.30)
-      drawIce( 0.80, 0.24)
-
-      // Nubes — wispy, órbita lenta
-      const cloudT = elapsed * 0.016
-      ctx.globalAlpha = 1
-      for (let i = 0; i < 7; i++) {
-        const ca  = cloudT + (i / 7) * Math.PI * 2
-        const lat = Math.sin(ca * 0.65) * 0.48
-        const xS2 = Math.cos(lat) * Math.sin(ca)
-        const yS2 = Math.sin(lat)
-        const zS2 = Math.cos(lat) * Math.cos(ca)
-        if (zS2 < 0.05) continue
-        const cX  = cx + ER * xS2
-        const cY  = cy - ER * yS2 * 0.94
-        const cA  = zS2 * 0.17
-        const cG  = ctx.createRadialGradient(cX, cY, 0, cX, cY, ER * 0.17)
-        cG.addColorStop(0, `rgba(238,244,255,${cA})`); cG.addColorStop(1, 'rgba(255,255,255,0)')
-        ctx.fillStyle = cG
-        ctx.beginPath(); ctx.arc(cX, cY, ER * 0.17, 0, Math.PI * 2); ctx.fill()
-      }
-
-      ctx.restore()  // fin clip
-
-      // Terminator día/noche
-      ctx.save()
-      ctx.beginPath(); ctx.arc(cx, cy, ER, 0, Math.PI * 2); ctx.clip()
-      const nightG = ctx.createRadialGradient(
-        cx - ER * LX * 0.62, cy - ER * LY * 0.62, 0,
-        cx, cy, ER
-      )
-      nightG.addColorStop(0,    'rgba(0,0,0,0)')
-      nightG.addColorStop(0.42, 'rgba(0,0,0,0.09)')
-      nightG.addColorStop(0.66, 'rgba(0,0,0,0.52)')
-      nightG.addColorStop(1,    'rgba(0,0,0,0.90)')
-      ctx.fillStyle = nightG
-      ctx.beginPath(); ctx.arc(cx, cy, ER, 0, Math.PI * 2); ctx.fill()
-      ctx.restore()
-
-      // Luz especular (highlight en zona iluminada)
-      ctx.save()
-      ctx.beginPath(); ctx.arc(cx, cy, ER, 0, Math.PI * 2); ctx.clip()
-      const specG = ctx.createRadialGradient(
-        cx + ER * LX * 0.52, cy + ER * LY * 0.52, 0,
-        cx + ER * LX * 0.52, cy + ER * LY * 0.52, ER * 0.55
-      )
-      specG.addColorStop(0, 'rgba(255,255,255,0.13)')
-      specG.addColorStop(1, 'rgba(255,255,255,0)')
-      ctx.fillStyle = specG
-      ctx.fillRect(0, 0, w, h)
-      ctx.restore()
-
-      // Rim light atmosférico (borde cyan tenue)
-      ctx.save()
-      const rimG = ctx.createRadialGradient(cx, cy, ER * 0.94, cx, cy, ER * 1.08)
-      rimG.addColorStop(0,   'rgba(63,180,230,0.00)')
-      rimG.addColorStop(0.5, 'rgba(63,180,230,0.14)')
-      rimG.addColorStop(1,   'rgba(63,180,230,0.00)')
-      ctx.beginPath(); ctx.arc(cx, cy, ER * 1.08, 0, Math.PI * 2)
-      ctx.fillStyle = rimG; ctx.fill()
-      ctx.restore()
-
-      if (!moonBehind) drawMoon()
-
-      // Viñeta dirigida — oscurece el lado opuesto al planeta para que
-      // el texto centro-izquierdo se lea limpio sin tapar el planeta.
-      const vgn = ctx.createRadialGradient(
-        w * 0.30, h * 0.45, 0,
-        w * 0.30, h * 0.45, Math.max(w, h) * 0.85
-      )
-      vgn.addColorStop(0,    'rgba(5,7,11,0.55)')
-      vgn.addColorStop(0.55, 'rgba(5,7,11,0.18)')
-      vgn.addColorStop(1,    'rgba(5,7,11,0)')
-      ctx.fillStyle = vgn; ctx.fillRect(0, 0, w, h)
-    }
-
-    raf = requestAnimationFrame(draw)
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize) }
-  }, [])
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      aria-hidden="true"
-    />
-  )
-}
 
 export default function Contact() {
   const c          = siteCopy.contact
@@ -315,9 +65,6 @@ export default function Contact() {
     >
       <div className="sticky top-0 h-screen overflow-hidden bg-background">
 
-        {/* Tierra + Luna — fondo espacial de cierre */}
-        <EarthMoon />
-
         {/* Cierre del túnel — imagen full-bleed, protagonista */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -330,7 +77,7 @@ export default function Contact() {
               alt=""
               draggable={false}
               className="w-full h-full object-cover object-center select-none"
-              style={{ opacity: 0.55 }}
+              style={{ opacity: 0.60 }}
             />
           </picture>
           {/* Vignette: oscurece bordes, deja el centro del túnel respirar */}
@@ -364,15 +111,15 @@ export default function Contact() {
           className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 md:px-12"
           style={staticStyle}
         >
-          <div className="w-full max-w-3xl mx-auto text-center flex flex-col items-center">
+          <div className="w-full max-w-4xl mx-auto text-center flex flex-col items-center">
 
             <SectionEyebrow num="(06)" label={c.eyebrow} colorClass="text-accent-cyan" className="mb-8 justify-center" />
 
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-textPrimary leading-[1.04] tracking-[-0.02em] mb-8 max-w-3xl">
+            <h2 className="text-4xl md:text-6xl lg:text-[7rem] leading-[0.96] font-semibold text-textPrimary tracking-[-0.02em] mb-8 max-w-4xl">
               {c.title}
             </h2>
 
-            <p className="text-textSecondary text-lg md:text-xl max-w-xl leading-[1.55] mb-12">
+            <p className="text-textSecondary text-xl md:text-2xl max-w-xl leading-[1.55] mb-12">
               {c.body}
             </p>
 
@@ -380,7 +127,7 @@ export default function Contact() {
             <button
               type="button"
               onClick={() => openCalcom(true)}
-              className="group inline-flex items-center gap-3 px-8 py-4 bg-accent-cyan text-background font-mono text-sm tracking-[0.16em] uppercase rounded-sm hover:opacity-92 transition-opacity mb-5 cursor-pointer"
+              className="group inline-flex items-center gap-3 px-10 py-5 bg-accent-cyan text-background font-mono text-base tracking-[0.16em] uppercase rounded-sm hover:opacity-92 transition-opacity mb-5 cursor-pointer"
             >
               <span>{c.ctaPrimary}</span>
               <span
