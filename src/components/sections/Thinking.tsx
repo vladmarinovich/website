@@ -30,7 +30,7 @@ export default function Thinking() {
     <motion.section
       id="thinking"
       ref={ref}
-      className="relative min-h-screen py-32 md:py-40 px-6 md:px-12"
+      className="relative min-h-screen py-36 md:py-48 px-6 md:px-12"
       style={{ opacity }}
     >
       <div className="max-w-7xl mx-auto">
@@ -41,7 +41,7 @@ export default function Thinking() {
             <SectionEyebrow num="(03)" label={c.eyebrow} colorClass="text-textSecondary" />
           </FadeUp>
           <FadeUp kind="title" delay={0.08}>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-textPrimary leading-[1.04] tracking-[-0.02em] mb-8">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold text-textPrimary leading-[1.04] tracking-[-0.02em] mb-8">
               {c.title}
             </h2>
           </FadeUp>
@@ -53,7 +53,7 @@ export default function Thinking() {
         </header>
 
         {/* Cuerpo del ensayo — columna única, principios respirando */}
-        <div className="max-w-3xl space-y-20 md:space-y-28">
+        <div className="max-w-3xl space-y-24 md:space-y-32">
           {c.principles.map((p, i) => (
             <FadeUp key={p.title} kind="body" delay={0.05 + i * 0.04}>
               <article>
@@ -64,12 +64,12 @@ export default function Thinking() {
                 </p>
 
                 {/* Título del principio — refinado, no efectista */}
-                <h3 className="text-2xl md:text-[1.85rem] font-semibold text-textPrimary leading-[1.2] tracking-[-0.015em] mb-6 max-w-[24ch]">
+                <h3 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-textPrimary leading-[1.2] tracking-[-0.015em] mb-6 max-w-[24ch]">
                   {p.title}
                 </h3>
 
                 {/* Cuerpo del principio — párrafo de revista */}
-                <p className="text-textSecondary text-lg md:text-xl leading-[1.7] max-w-[65ch]">
+                <p className="text-textSecondary text-lg md:text-xl leading-[1.75] max-w-[65ch]">
                   {p.body}
                 </p>
               </article>
