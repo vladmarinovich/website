@@ -37,9 +37,6 @@ export default function Contact() {
     offset: ['start start', 'end end'],
   })
 
-  // Atmósfera de la imagen — entra suave, NUNCA toma protagonismo
-  const atmoOpacity = useTransform(scrollYProgress, [0, 0.18, 0.6], [0, 0.18, 0.10])
-
   // Copy reveal — temprano, decidido
   const contentOpacity = useTransform(scrollYProgress, [0.04, 0.22], [0, 1])
   const contentY       = useTransform(scrollYProgress, [0.04, 0.22], [24, 0])
