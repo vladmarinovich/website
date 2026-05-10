@@ -19,6 +19,7 @@ import { siteCopy } from '@/content/siteCopy'
 import { useSectionOpacity } from '@/hooks/useSectionOpacity'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { FadeUp } from '@/components/ui/FadeUp'
+import { SectionEyebrow } from '@/components/ui/SectionEyebrow'
 
 export default function About() {
   const ref      = useRef<HTMLElement>(null)
@@ -37,38 +38,36 @@ export default function About() {
     <motion.section
       id="about"
       ref={ref}
-      className="relative min-h-screen py-32 px-6 md:px-12"
+      className="relative min-h-screen py-36 md:py-48 px-6 md:px-12"
       style={{ opacity }}
     >
       <div className="max-w-7xl mx-auto">
 
         <FadeUp kind="eyebrow">
-          <p className="font-mono text-xs md:text-sm tracking-[0.28em] text-accent-orange mb-6 uppercase">
-            {c.eyebrow}
-          </p>
+          <SectionEyebrow num="(04)" label={c.eyebrow} colorClass="text-accent-orange" />
         </FadeUp>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-20 md:gap-28 items-start">
 
           {/* Columna de texto */}
           <div>
             <FadeUp kind="title" delay={0.08}>
-              <h2 className="text-4xl md:text-5xl font-semibold text-textPrimary leading-[1.04] tracking-[-0.02em] mb-8 max-w-xl">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-textPrimary leading-[1.04] tracking-[-0.02em] mb-8 max-w-xl">
                 {c.title}
               </h2>
             </FadeUp>
             <FadeUp kind="body" delay={0.20}>
-              <p className="drop-cap text-textSecondary text-lg md:text-xl leading-[1.65] mb-6 max-w-lg">
+              <p className="drop-cap text-textSecondary text-lg md:text-xl leading-[1.7] mb-6 max-w-lg">
                 {c.bodyPrimary}
               </p>
             </FadeUp>
             <FadeUp kind="body" delay={0.28}>
-              <p className="text-textSecondary text-lg md:text-xl leading-[1.65] mb-10 max-w-lg">
+              <p className="text-textSecondary text-lg md:text-xl leading-[1.7] mb-10 max-w-lg">
                 {c.bodySecondary}
               </p>
             </FadeUp>
             <FadeUp kind="body" delay={0.36}>
-              <blockquote className="border-l-2 border-accent-orange pl-6 text-textPrimary italic text-lg md:text-xl leading-[1.55] max-w-lg">
+              <blockquote className="border-l-2 border-accent-orange pl-6 text-textPrimary italic text-xl md:text-2xl leading-[1.55] max-w-lg">
                 « {c.quote} »
               </blockquote>
             </FadeUp>

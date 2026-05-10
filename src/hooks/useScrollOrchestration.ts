@@ -35,13 +35,15 @@ const SECTION_STATES: Record<SceneSection, {
   tunnelIntensity: number
   bloomStrength: number
 }> = {
-  hero:         { color: 'cyan',    tunnelIntensity: 1.00, bloomStrength: 0.85 },
-  evidence:     { color: 'cyan',    tunnelIntensity: 0.45, bloomStrength: 0.45 },
-  capabilities: { color: 'purple',  tunnelIntensity: 0.35, bloomStrength: 0.35 },
-  thinking:     { color: 'neutral', tunnelIntensity: 0.22, bloomStrength: 0.25 },
-  about:        { color: 'orange',  tunnelIntensity: 0.18, bloomStrength: 0.22 },
-  standards:    { color: 'neutral', tunnelIntensity: 0.12, bloomStrength: 0.18 },
-  contact:      { color: 'white',   tunnelIntensity: 0.00, bloomStrength: 1.80 },
+  // Tres beats de luz / dos valles oscuros
+  // Anillos visibles solo si tunnelIntensity > 0.40 (threshold en SceneCanvas)
+  hero:         { color: 'cyan',    tunnelIntensity: 1.00, bloomStrength: 0.85 }, // pico 1 — bienvenida total
+  evidence:     { color: 'cyan',    tunnelIntensity: 0.52, bloomStrength: 0.50 }, // se retira pero aún presente
+  capabilities: { color: 'purple',  tunnelIntensity: 0.18, bloomStrength: 0.15 }, // valle 1 — oscuro, contenido manda
+  thinking:     { color: 'neutral', tunnelIntensity: 0.10, bloomStrength: 0.10 }, // valle 2 — casi negro total
+  about:        { color: 'orange',  tunnelIntensity: 0.28, bloomStrength: 0.30 }, // pulso cálido — momento humano
+  standards:    { color: 'neutral', tunnelIntensity: 0.08, bloomStrength: 0.08 }, // mínimo — seriedad absoluta
+  contact:      { color: 'cyan',    tunnelIntensity: 0.65, bloomStrength: 0.90 }, // pico 2 — portal se reabre
 }
 
 export function useScrollOrchestration() {

@@ -5,7 +5,12 @@
 @layer base {
   html { background: #05070B; color: #F5F7FA; }
   body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-  ::selection { background: #63D7FF; color: #05070B; }
+  ::selection { background: rgba(99,215,255,0.25); color: #F5F7FA; }
+
+  h1, h2, h3 {
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+    text-rendering: optimizeLegibility;
+  }
 }
 
 /* Grain overlay */

@@ -32,31 +32,17 @@ import Contact from '@/components/sections/Contact'
 import { CaseOverlay } from '@/components/cases/CaseOverlay'
 import { Preloader } from '@/components/ui/Preloader'
 import { CustomCursor } from '@/components/ui/CustomCursor'
+import { CalcomModal } from '@/components/ui/CalcomModal'
+import { ScrollProgress } from '@/components/ui/ScrollProgress'
 import { useLenis } from '@/hooks/useLenis'
 import { useScrollProgress } from '@/hooks/useScrollProgress'
 import { useDeviceTier } from '@/hooks/useDeviceTier'
 import { useScrollOrchestration } from '@/hooks/useScrollOrchestration'
-import { useSceneStore } from '@/store/sceneStore'
 
-/* ── ContactBurstOverlay ─────────────────────────────────── */
-// Halo radial blanco-azulado al llegar a la sección contact.
-// z-5: encima del hero (z-1) y del tunnel (z-0), debajo del contenido (z-10).
-function ContactBurstOverlay() {
-  const burst = useSceneStore((s) => s.contactBurstProgress)
-  if (burst < 0.01) return null
-
-  return (
-    <div
-      className="fixed inset-0 pointer-events-none"
-      style={{
-        zIndex: 5,
-        background: `radial-gradient(ellipse 80% 50% at 50% 85%,
-          rgba(190, 210, 230, ${burst * 0.13}) 0%,
-          transparent 70%)`,
-      }}
-    />
-  )
-}
+// ContactBurstOverlay removido — ya no hay zoom blanco final.
+// El sceneStore.contactBurstProgress sigue calculándose en useScrollOrchestration
+// pero ya no lo consume nadie. Se deja para uso futuro (e.g. modular si
+// queremos un sutil glow al llegar al cierre).
 
 /* ── AppInner ────────────────────────────────────────────── */
 function AppInner() {
@@ -77,9 +63,6 @@ function AppInner() {
       {/* z-1 — fondo del hero, fixed, se disuelve con scroll */}
       <HeroLayers />
 
-      {/* z-5 — halo blanco en contact */}
-      <ContactBurstOverlay />
-
       {/* z-10 — todo el contenido HTML */}
       <BaseLayout>
         <Hero />
@@ -97,8 +80,14 @@ function AppInner() {
       {/* z-60 — preloader: firma sobre fondo negro hasta que el canvas esté listo */}
       <Preloader />
 
+      {/* z-999 — barra de progreso de scroll, 1px cyan → purple */}
+      <ScrollProgress />
+
       {/* cursor personalizado — solo desktop (pointer: fine), encima de todo */}
       <CustomCursor />
+
+      {/* z-70/71 — modal de Cal.com (encima de overlay y preloader) */}
+      <CalcomModal />
     </>
   )
 }

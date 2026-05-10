@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react'
 import Nav from '@/components/nav/Nav'
+import Footer from '@/components/layout/Footer'
 
 interface BaseLayoutProps {
   children: ReactNode
@@ -20,6 +21,7 @@ export default function BaseLayout({ children }: BaseLayoutProps) {
       <main className="relative z-10">
         {children}
       </main>
+      <Footer />
     </div>
   )
 }

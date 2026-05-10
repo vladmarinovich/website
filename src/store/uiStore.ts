@@ -15,10 +15,12 @@ type UIStore = {
   reducedMotion: boolean
   navVisible: boolean
   sceneReady: boolean
+  calcomOpen: boolean
   setDeviceTier: (tier: DeviceTier) => void
   setReducedMotion: (value: boolean) => void
   setNavVisible: (value: boolean) => void
   setSceneReady: (value: boolean) => void
+  setCalcomOpen: (value: boolean) => void
 }
 
 export const useUIStore = create<UIStore>((set) => ({
@@ -26,9 +28,11 @@ export const useUIStore = create<UIStore>((set) => ({
   reducedMotion: false,
   navVisible: true,
   sceneReady: false,
+  calcomOpen: false,
 
   setDeviceTier:    (tier)  => set({ deviceTier: tier }),
   setReducedMotion: (value) => set({ reducedMotion: value }),
   setNavVisible:    (value) => set({ navVisible: value }),
   setSceneReady:    (value) => set({ sceneReady: value }),
+  setCalcomOpen:    (value) => set({ calcomOpen: value }),
 }))

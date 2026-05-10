@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { siteCopy } from '@/content/siteCopy'
 import { useSceneStore } from '@/store/sceneStore'
+import { useUIStore } from '@/store/uiStore'
 
 const EASE: [number, number, number, number] = [0.2, 0.65, 0.25, 1]
 
@@ -17,6 +18,7 @@ export default function Nav() {
   const [scrolled,   setScrolled]   = useState(false)
   const [menuOpen,   setMenuOpen]   = useState(false)
   const activeSection = useSceneStore((s) => s.activeSection)
+  const openCalcom    = useUIStore((s) => s.setCalcomOpen)
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 48)
@@ -99,14 +101,14 @@ export default function Nav() {
             })}
           </nav>
 
-          {/* CTA desktop */}
-          <a
-            href="#contact"
-            onClick={(e) => handleAnchor(e, '#contact')}
-            className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-white/15 bg-white/[0.02] font-mono text-xs tracking-[0.16em] text-textSecondary hover:text-textPrimary hover:border-white/30 transition-all uppercase"
+          {/* CTA desktop — abre Cal.com modal */}
+          <button
+            type="button"
+            onClick={() => openCalcom(true)}
+            className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-accent-cyan/25 bg-transparent font-mono text-xs tracking-[0.16em] text-accent-cyan/80 hover:text-accent-cyan hover:border-accent-cyan/50 transition-all uppercase cursor-pointer"
           >
             {siteCopy.nav.cta}
-          </a>
+          </button>
 
           {/* Hamburger mobile */}
           <button
@@ -166,17 +168,17 @@ export default function Nav() {
                 </motion.a>
               ))}
 
-              {/* CTA mobile */}
-              <motion.a
-                href="#contact"
-                onClick={(e) => handleAnchor(e, '#contact')}
+              {/* CTA mobile — abre Cal.com modal */}
+              <motion.button
+                type="button"
+                onClick={() => { setMenuOpen(false); setTimeout(() => openCalcom(true), 220) }}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.32, ease: EASE, delay: siteCopy.nav.links.length * 0.055 }}
-                className="mt-4 px-8 py-3 border border-white/20 font-mono text-xs tracking-[0.22em] uppercase text-textPrimary hover:border-white/40 transition-colors"
+                className="mt-4 px-8 py-3 border border-white/20 font-mono text-xs tracking-[0.22em] uppercase text-textPrimary hover:border-white/40 transition-colors cursor-pointer"
               >
                 {siteCopy.nav.cta}
-              </motion.a>
+              </motion.button>
             </nav>
 
             {/* Wordmark al fondo — identidad mientras el menú está abierto */}

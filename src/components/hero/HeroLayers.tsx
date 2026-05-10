@@ -71,12 +71,15 @@ function HeroBackground({ scale }: { scale: MotionValue<number> }) {
 // Canvas 2D — núcleo de singularidad viva.
 // Sin anillos, sin ondas. Solo la masa amorfa del centro que,
 // al hacer scroll, se expande y TRAGA la pantalla completa.
-// Transición tipo "succión": lenta al inicio, acelera al final.
-// Al llegar a opacity 0 del hero, el núcleo ya cubre toda la pantalla
-// y revela el túnel 3D por debajo — cross-dissolve sin corte.
+//
+// v2.0 — tres comportamientos nuevos:
+//  1. Color: cyan (77,217,230) → purple (154,124,255) al hacer scroll
+//  2. Partículas: 40 puntos orbitan y se absorben hacia el centro
+//  3. Micro-turbulencia: el contorno reacciona a la posición del mouse
 
 function PortalPulse() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const mouseRef  = useRef({ x: -9999, y: -9999 })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -92,6 +95,22 @@ function PortalPulse() {
     }
     resize()
     window.addEventListener('resize', resize)
+
+    // Mouse tracking — micro-turbulencia del contorno
+    const onMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY }
+    }
+    window.addEventListener('mousemove', onMouseMove)
+
+    // 40 partículas inicializadas una vez — orbitan y se absorben al hacer scroll
+    interface Particle { angle: number; orbitMult: number; speed: number; size: number; opacity: number }
+    const particles: Particle[] = Array.from({ length: 40 }, (_, i) => ({
+      angle:     (i / 40) * Math.PI * 2 + Math.random() * 0.5,
+      orbitMult: 1.8 + Math.random() * 3.2,   // multiplicador de SR_BASE
+      speed:     (Math.random() > 0.5 ? 1 : -1) * (0.18 + Math.random() * 0.22),
+      size:      0.8 + Math.random() * 1.4,
+      opacity:   0.25 + Math.random() * 0.45,
+    }))
 
     const VH = window.innerHeight
     const mountTime = performance.now()
@@ -112,14 +131,9 @@ function PortalPulse() {
       if (ramp < 0.005) return
 
       // ── Scroll: sincronizado con el zoom del fondo ──────────
-      // El zoom usa SCALE_X = [0, 0.25vh, 0.55vh, 0.75vh] con
-      // SCALE_Y = [1, 1.08, 1.55, 2.20]. Derivamos la fracción del
-      // núcleo del mismo rango para que ambos vayan exactamente igual.
       const scrollY = window.scrollY
-
-      // Piecewise linear sobre los mismos breakpoints del zoom
       const ZX = [0, VH * 0.25, VH * 0.55, VH * 0.75]
-      const ZY = [0, 0.068,     0.458,      1.0]  // normalizado 0→1 (SCALE_Y−1)/(2.20−1)
+      const ZY = [0, 0.068,     0.458,      1.0]
       let tEased = 0
       if (scrollY <= ZX[0]) {
         tEased = ZY[0]
@@ -135,16 +149,33 @@ function PortalPulse() {
         }
       }
 
+      // ── 1. Color: purple → cyan según scroll ────────────────
+      // purple (154,124,255) → cyan (77,217,230), lineal con tEased
+      const colorT = Math.min(1, tEased * 1.6)
+      const cr = Math.round(154 + ( 77 - 154) * colorT)
+      const cg = Math.round(124 + (217 - 124) * colorT)
+      const cb = Math.round(255 + (230 - 255) * colorT)
+      // Variante clara para plasma / inner core
+      const chr = Math.min(255, Math.round(cr * 1.25 + 40))
+      const chg = Math.min(255, Math.round(cg * 1.15 + 20))
+      const chb = Math.min(255, Math.round(cb * 0.80))
+
       // ── Tamaño del núcleo ────────────────────────────────────
       const isMobile  = w < 768
       const portalRef = Math.min(w, h) * 0.40
       const SR_BASE   = portalRef * (isMobile ? 0.095 : 0.052)
-      // SR_MAX cubre la diagonal completa del viewport — sin esquinas visibles
       const SR_MAX    = Math.sqrt(w * w + h * h) * 0.58
       const SR        = SR_BASE + (SR_MAX - SR_BASE) * tEased
 
+      // ── 3. Mouse micro-turbulencia ───────────────────────────
+      const mdx = mouseRef.current.x - cx
+      const mdy = mouseRef.current.y - cy
+      const mouseDist     = Math.sqrt(mdx * mdx + mdy * mdy)
+      const mouseAngle    = Math.atan2(mdy, mdx)
+      // Influencia máxima cuando el cursor está sobre el blob; decae con distancia
+      const mouseInfluence = Math.max(0, 1 - mouseDist / (SR * 2.5)) * 0.07 * (1 - tEased * 0.85)
+
       // ── Forma orgánica ───────────────────────────────────────
-      // La perturbación baja al crecer: la succión se siente limpia
       const perturbScale = (1 - tEased) * (1 - tEased)
       const nucleusShape = (a: number) =>
         SR * (
@@ -154,7 +185,8 @@ function PortalPulse() {
             0.17 * Math.sin(a * 5 - elapsed * 0.44 + 1.1) +
             0.11 * Math.cos(a * 7 + elapsed * 0.19 + 2.4) +
             0.07 * Math.sin(a * 11 - elapsed * 0.33 + 0.6)
-          )
+          ) +
+          mouseInfluence * Math.cos(a - mouseAngle)
         )
 
       const buildNucleusPath = () => {
@@ -173,18 +205,41 @@ function PortalPulse() {
       ctx.save()
       ctx.translate(cx, cy)
 
+      // ── 2. Partículas absorbidas ─────────────────────────────
+      // Orbitan en reposo, espiralan hacia el centro al hacer scroll.
+      // Desaparecen cuando tEased supera 0.5 (blob ya los tragó).
+      const particleGlobalAlpha = ramp * Math.max(0, 1 - tEased * 2.0)
+      if (particleGlobalAlpha > 0.005) {
+        const absorptionFactor = Math.min(1, tEased * 2.5)
+        for (const p of particles) {
+          const currentAngle = p.angle + elapsed * p.speed
+          const orbitR = p.orbitMult * SR_BASE * Math.max(0.04, 1 - absorptionFactor * 0.96)
+          const px = Math.cos(currentAngle) * orbitR
+          const py = Math.sin(currentAngle) * orbitR
+          const pAlpha = p.opacity * particleGlobalAlpha
+          ctx.beginPath()
+          ctx.arc(px, py, p.size, 0, Math.PI * 2)
+          // Partículas fijas en morado — contrastan con el blob cyan inicial
+          ctx.fillStyle   = `rgba(154,124,255,${pAlpha})`
+          ctx.shadowColor = `rgba(154,124,255,${pAlpha * 0.7})`
+          ctx.shadowBlur  = 5
+          ctx.fill()
+          ctx.shadowBlur  = 0
+        }
+      }
+
       // a. Aura exterior — glow que se atenúa al crecer
       const auraAlpha = ramp * (1 - tEased * 0.8)
       buildNucleusPath()
-      ctx.shadowColor = `rgba(155,75,255,${auraAlpha * 0.55})`
+      ctx.shadowColor = `rgba(${cr},${cg},${cb},${auraAlpha * 0.55})`
       ctx.shadowBlur  = 28
       ctx.fillStyle   = 'rgba(0,0,0,0)'
       ctx.fill()
 
       const auraGrad = ctx.createRadialGradient(0, 0, SR * 0.6, 0, 0, SR * 2.2)
-      auraGrad.addColorStop(0,   `rgba(150,70,245,${auraAlpha * 0.22})`)
-      auraGrad.addColorStop(0.6, `rgba(110,45,200,${auraAlpha * 0.08})`)
-      auraGrad.addColorStop(1,   'rgba(80,30,170,0)')
+      auraGrad.addColorStop(0,   `rgba(${cr},${cg},${cb},${auraAlpha * 0.22})`)
+      auraGrad.addColorStop(0.6, `rgba(${Math.round(cr*0.72)},${Math.round(cg*0.59)},${Math.round(cb*0.82)},${auraAlpha * 0.08})`)
+      auraGrad.addColorStop(1,   'rgba(0,0,0,0)')
       ctx.shadowBlur = 0
       ctx.fillStyle  = auraGrad
       ctx.beginPath()
@@ -196,11 +251,11 @@ function PortalPulse() {
       buildNucleusPath()
       ctx.clip()
 
-      // Materia oscura densa — casi negro con tinte violeta profundo
+      // Materia oscura densa — casi negro con tinte de color
       ctx.fillStyle = `rgba(5,1,16,${ramp * 0.94})`
       ctx.fillRect(-SR * 2.5, -SR * 2.5, SR * 5, SR * 5)
 
-      // Bolsas de plasma: se atenúan al expandirse (no luchan con el fondo)
+      // Bolsas de plasma: se atenúan al expandirse
       const plasmaAlpha = 1 - tEased * 0.85
       for (let i = 0; i < 4; i++) {
         const pt = elapsed * (0.25 + i * 0.08) + i * 1.6
@@ -208,18 +263,18 @@ function PortalPulse() {
         const py = Math.sin(pt * 1.27) * SR * 0.34
         const pr = SR * (0.36 + 0.12 * Math.sin(elapsed * 0.4 + i))
         const pg = ctx.createRadialGradient(px, py, 0, px, py, pr)
-        pg.addColorStop(0,   `rgba(210,140,255,${ramp * plasmaAlpha * (0.38 + 0.14 * Math.sin(elapsed * 0.6 + i))})`)
-        pg.addColorStop(0.5, `rgba(155,75,240,${ramp * plasmaAlpha * 0.18})`)
-        pg.addColorStop(1,   'rgba(100,40,180,0)')
+        pg.addColorStop(0,   `rgba(${chr},${chg},${chb},${ramp * plasmaAlpha * (0.38 + 0.14 * Math.sin(elapsed * 0.6 + i))})`)
+        pg.addColorStop(0.5, `rgba(${cr},${cg},${cb},${ramp * plasmaAlpha * 0.18})`)
+        pg.addColorStop(1,   'rgba(0,0,0,0)')
         ctx.fillStyle = pg
         ctx.fillRect(-SR * 2.5, -SR * 2.5, SR * 5, SR * 5)
       }
 
       // Luminosidad central — corazón de la masa
       const innerCore = ctx.createRadialGradient(0, 0, 0, 0, 0, SR * 0.55)
-      innerCore.addColorStop(0,   `rgba(220,160,255,${ramp * 0.45})`)
-      innerCore.addColorStop(0.5, `rgba(170,90,255,${ramp * 0.22})`)
-      innerCore.addColorStop(1,   'rgba(120,55,220,0)')
+      innerCore.addColorStop(0,   `rgba(${chr},${chg},${chb},${ramp * 0.45})`)
+      innerCore.addColorStop(0.5, `rgba(${cr},${cg},${cb},${ramp * 0.22})`)
+      innerCore.addColorStop(1,   'rgba(0,0,0,0)')
       ctx.fillStyle = innerCore
       ctx.fillRect(-SR * 2.5, -SR * 2.5, SR * 5, SR * 5)
 
@@ -229,9 +284,9 @@ function PortalPulse() {
       const strokeAlpha = ramp * 0.65 * (1 - tEased * 0.95)
       if (strokeAlpha > 0.01) {
         buildNucleusPath()
-        ctx.shadowColor = `rgba(175,95,255,${ramp * 0.80 * (1 - tEased)})`
+        ctx.shadowColor = `rgba(${cr},${cg},${cb},${ramp * 0.80 * (1 - tEased)})`
         ctx.shadowBlur  = 12
-        ctx.strokeStyle = `rgba(190,110,255,${strokeAlpha})`
+        ctx.strokeStyle = `rgba(${Math.min(255, cr + 36)},${Math.min(255, cg + 25)},${Math.min(255, cb)},${strokeAlpha})`
         ctx.lineWidth   = 1.2
         ctx.stroke()
       }
@@ -239,9 +294,6 @@ function PortalPulse() {
       ctx.restore()
 
       // ── Máscara radial ───────────────────────────────────────
-      // En reposo contiene el núcleo dentro del portal.
-      // Durante la transición se disuelve para que el núcleo pueda
-      // crecer sin límite y tragar la pantalla.
       const maskStrength = 1 - tEased
       if (maskStrength > 0.01) {
         const maskR  = portalRef * (1 + tEased * 0.8)
@@ -262,6 +314,7 @@ function PortalPulse() {
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
+      window.removeEventListener('mousemove', onMouseMove)
     }
   }, [])
 
